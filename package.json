@@ -6,7 +6,16 @@
   "scripts": {
     "dev": "tsx watch --env-file=.env src/server.ts",
     "lint": "eslint . --ext .ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f postgres",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
+    "db:seed": "tsx prisma/seed.ts",
+    "setup": "cp .env.example .env && npm run db:up && npm run db:generate"
   },
   "keywords": [],
   "author": "",
@@ -14,6 +23,7 @@
   "type": "module",
   "dependencies": {
     "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/client": "^7.3.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "express": "^5.2.1",
