@@ -20,7 +20,7 @@ export default [
       "prettier": prettier,
     },
     rules: {
-      "indent": ["error", 4],
+      "indent": ["error", 2],
       "quotes": ["error", "single"],
       "semi": ["error", "always"],
       "linebreak-style": ["error", "unix"],
@@ -31,6 +31,7 @@ export default [
         {
           singleQuote: true,
           semi: true,
+          tabWidth: 2,
         },
       ],
     },
