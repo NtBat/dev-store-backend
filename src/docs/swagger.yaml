@@ -1,0 +1,91 @@
+openapi: 3.0.0
+info:
+  title: DevStore API
+  version: 1.0.0
+  description: API documentation for DevStore backend
+  contact:
+    name: DevStore Team
+
+servers:
+  - url: http://localhost:3333
+    description: Development server
+  - url: http://localhost:4000
+    description: Alternative development server
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Banners
+    description: Banner management
+
+paths:
+  /ping:
+    get:
+      summary: Health check endpoint
+      description: Returns a pong response to verify the API is running
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pong:
+                    type: boolean
+                    example: true
+
+  /banners:
+    get:
+      summary: Get all banners
+      description: Retrieves all active banners with absolute image URLs
+      tags:
+        - Banners
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BannersResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+
+    Banner:
+      type: object
+      properties:
+        img:
+          type: string
+          description: Banner image URL
+          example: http://localhost:3333/media/banners/banner-1.png
+        link:
+          type: string
+          description: Banner redirect link
+          example: /products/category
+
+    BannersResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          nullable: true
+          description: Error message (null if success)
+        banners:
+          type: array
+          items:
+            $ref: '#/components/schemas/Banner'

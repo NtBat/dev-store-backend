@@ -29,6 +29,7 @@ npm run dev
 - [Quick Start](#-quick-start)
 - [Installation](#installation)
 - [Troubleshooting](#-troubleshooting)
+- [API Documentation](#-api-documentation)
 - [General](#general)
 - [Banners](#banners)
 - [Products](#products)
@@ -226,6 +227,25 @@ npm run db:up
 npm run db:push
 npm run db:seed
 ```
+
+---
+
+## 📚 API Documentation
+
+A API possui documentação interativa com **Swagger UI**:
+
+```
+http://localhost:3333/api-docs
+```
+
+### Recursos do Swagger:
+
+- ✅ Documentação interativa de todos os endpoints
+- ✅ Testar requisições diretamente na interface
+- ✅ Ver schemas de request/response
+- ✅ Exemplos de uso
+
+Para adicionar documentação em novas rotas, consulte [SWAGGER.md](./SWAGGER.md)
 
 ---
 
