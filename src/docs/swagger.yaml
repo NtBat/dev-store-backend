@@ -160,6 +160,58 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /products/{id}/related:
+    get:
+      summary: Get related products
+      description: Retrieves products from the same category as the specified product, excluding the product itself. Results are ordered by view count (most viewed first). Default limit is 4 products.
+      tags:
+        - Products
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            pattern: '^\d+$'
+          description: Product unique identifier to find related products
+          example: '1'
+        - in: query
+          name: limit
+          schema:
+            type: string
+            pattern: '^\d+$'
+          description: Maximum number of related products to return (default is 4)
+          example: '4'
+      responses:
+        '200':
+          description: Successful response with related products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductsResponse'
+        '400':
+          description: Invalid product ID or limit parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Product not found or no related products available
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Products not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     Error:
