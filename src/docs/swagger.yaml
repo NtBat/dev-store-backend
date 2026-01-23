@@ -17,6 +17,8 @@ tags:
     description: Health check endpoints
   - name: Banners
     description: Banner management
+  - name: Products
+    description: Product management and catalog
 
 paths:
   /ping:
@@ -57,6 +59,62 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /products:
+    get:
+      summary: Get all products
+      description: Retrieves products with filtering, sorting, and limit options. Supports filtering by metadata (e.g., technology tags) using pipe-separated values.
+      tags:
+        - Products
+      parameters:
+        - in: query
+          name: metadata
+          schema:
+            type: string
+          description: |
+            JSON string with metadata filters. Format: `{"categoryMetadataId": "value1|value2|value3"}`.
+            Example: `{"tech": "react|node"}` filters products with React OR Node tags.
+          example: '{"tech":"react|node"}'
+        - in: query
+          name: orderBy
+          schema:
+            type: string
+            enum:
+              - views
+              - selling
+              - price
+          description: |
+            Sort products by:
+            - `views` - Most viewed (default)
+            - `selling` - Best selling
+            - `price` - Lowest price first
+          example: views
+        - in: query
+          name: limit
+          schema:
+            type: string
+            pattern: '^\d+$'
+          description: Maximum number of products to return
+          example: '10'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductsResponse'
+        '400':
+          description: Invalid query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     Error:
@@ -89,3 +147,41 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Banner'
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Product unique identifier
+          example: 1
+        label:
+          type: string
+          description: Product name/label
+          example: Camisa React
+        price:
+          type: number
+          format: float
+          description: Product price
+          example: 94.5
+        image:
+          type: string
+          nullable: true
+          description: Product image URL (first image)
+          example: http://localhost:3333/media/products/camiseta-react-azul.png
+        liked:
+          type: boolean
+          description: Whether the product is liked by the user (TODO - always false for now)
+          example: false
+
+    ProductsResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          nullable: true
+          description: Error message (null if success)
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
