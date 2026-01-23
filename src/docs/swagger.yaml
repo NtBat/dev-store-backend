@@ -115,6 +115,51 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /products/{id}:
+    get:
+      summary: Get product by ID
+      description: Retrieves detailed information about a specific product including all images, description, and category. Also increments the product view count.
+      tags:
+        - Products
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            pattern: '^\d+$'
+          description: Product unique identifier
+          example: '1'
+      responses:
+        '200':
+          description: Successful response with product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetailResponse'
+        '400':
+          description: Invalid product ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Product not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     Error:
@@ -185,3 +230,65 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Product'
+
+    ProductDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Product unique identifier
+          example: 1
+        label:
+          type: string
+          description: Product name/label
+          example: Camisa React
+        price:
+          type: number
+          format: float
+          description: Product price
+          example: 94.5
+        description:
+          type: string
+          nullable: true
+          description: Detailed product description
+          example: Camisa com logo do React, ideal para front-end developers
+        categoryId:
+          type: integer
+          description: Category ID reference
+          example: 1
+        images:
+          type: array
+          items:
+            type: string
+          description: Array of product image URLs
+          example:
+            - http://localhost:3333/media/products/camiseta-react-azul.png
+            - http://localhost:3333/media/products/camiseta-react-preta.png
+
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Category unique identifier
+          example: 1
+        name:
+          type: string
+          description: Category name
+          example: Camisas
+        slug:
+          type: string
+          description: Category URL slug
+          example: camisas
+
+    ProductDetailResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          nullable: true
+          description: Error message (null if success)
+        product:
+          $ref: '#/components/schemas/ProductDetail'
+        category:
+          $ref: '#/components/schemas/Category'
