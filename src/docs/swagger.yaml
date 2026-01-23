@@ -19,6 +19,8 @@ tags:
     description: Banner management
   - name: Products
     description: Product management and catalog
+  - name: Categories
+    description: Category management and metadata
 
 paths:
   /ping:
@@ -212,6 +214,50 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /category/{slug}/metadata:
+    get:
+      summary: Get category with metadata
+      description: Retrieves a category by its slug along with all associated metadata (filters) and their possible values. Useful for building dynamic filter interfaces.
+      tags:
+        - Categories
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema:
+            type: string
+          description: Category URL slug
+          example: 'camisas'
+      responses:
+        '200':
+          description: Successful response with category and metadata
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryMetadataResponse'
+        '400':
+          description: Invalid slug parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Category not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Category not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     Error:
@@ -344,3 +390,47 @@ components:
           $ref: '#/components/schemas/ProductDetail'
         category:
           $ref: '#/components/schemas/Category'
+
+    MetadataValue:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Metadata value unique identifier
+          example: react
+        label:
+          type: string
+          description: Human-readable label
+          example: React
+
+    CategoryMetadata:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Category metadata unique identifier
+          example: tech
+        name:
+          type: string
+          description: Metadata field name
+          example: Tecnologia
+        values:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetadataValue'
+          description: Available values for this metadata field
+
+    CategoryMetadataResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          nullable: true
+          description: Error message (null if success)
+        category:
+          $ref: '#/components/schemas/Category'
+        metadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryMetadata'
+          description: Array of metadata fields with their possible values
