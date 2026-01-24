@@ -572,6 +572,40 @@ paths:
                   error:
                     type: string
                     example: Failed to create user address
+    get:
+      summary: Get user addresses
+      description: Retrieves all addresses for the authenticated user, ordered by creation date (newest first). Requires authentication token in the Authorization header.
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Addresses retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressesListResponse'
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+        '500':
+          description: Internal server error or failed to get addresses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get user addresses
 
 components:
   schemas:
@@ -904,6 +938,19 @@ components:
           description: Error message (null if success)
         address:
           $ref: '#/components/schemas/Address'
+
+    AddressesListResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          nullable: true
+          description: Error message (null if success)
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+          description: List of user addresses ordered by creation date (newest first)
 
   securitySchemes:
     BearerAuth:

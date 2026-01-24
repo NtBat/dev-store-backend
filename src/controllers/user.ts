@@ -2,7 +2,10 @@ import { RequestHandler, Request, Response } from 'express';
 import { createUserSchema, loginUserSchema } from '../schemas/user-schema';
 import { createUser as createUserService, loginUser as loginUserService } from '../services/user';
 import { addAddressSchema } from '../schemas/add-address-schema';
-import { createUserAddress as createUserAddressService } from '../services/user';
+import {
+  createUserAddress as createUserAddressService,
+  getUserAddresses as getUserAddressesService,
+} from '../services/user';
 import { Address } from '../types/address';
 
 export const createUser: RequestHandler = async (req: Request, res: Response) => {
@@ -70,4 +73,20 @@ export const createUserAddress: RequestHandler = async (req: Request, res: Respo
   }
 
   res.status(201).json({ error: null, address: userAddress });
+};
+
+export const getUserAddresses: RequestHandler = async (req: Request, res: Response) => {
+  const userId = (req as any).userId;
+  if (!userId) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  const userAddresses = await getUserAddressesService(userId);
+  if (!userAddresses) {
+    res.status(500).json({ error: 'Failed to get user addresses' });
+    return;
+  }
+
+  res.json({ error: null, addresses: userAddresses });
 };

@@ -22,3 +22,4 @@ routes.get('/cart/shipping', shippingController.getCartShipping);
 routes.post('/user/register', userController.createUser);
 routes.post('/user/login', userController.loginUser);
 routes.post('/user/addresses', authMiddleware, userController.createUserAddress);
+routes.get('/user/addresses', authMiddleware, userController.getUserAddresses);

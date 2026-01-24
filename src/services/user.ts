@@ -77,3 +77,20 @@ export const createUserAddress = async (userId: number, address: Address) => {
     },
   });
 };
+
+export const getUserAddresses = async (userId: number) => {
+  return await prisma.userAddress.findMany({
+    where: { userId },
+    select: {
+      id: true,
+      zipcode: true,
+      street: true,
+      number: true,
+      city: true,
+      state: true,
+      country: true,
+      complement: true,
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+};
