@@ -23,6 +23,8 @@ tags:
     description: Category management and metadata
   - name: Cart
     description: Shopping cart operations
+  - name: Users
+    description: User authentication and management
 
 paths:
   /ping:
@@ -357,6 +359,64 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /user/register:
+    post:
+      summary: Register new user
+      description: Creates a new user account with name, email, and password. Email must be unique. Password is hashed with bcrypt before storage.
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  minLength: 3
+                  description: User's full name (minimum 3 characters)
+                  example: João Silva
+                email:
+                  type: string
+                  format: email
+                  minLength: 10
+                  description: User's email address (must be valid and unique)
+                  example: joao.silva@example.com
+                password:
+                  type: string
+                  minLength: 8
+                  format: password
+                  description: User's password (minimum 8 characters, will be hashed)
+                  example: senha123456
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+        '400':
+          description: Invalid request body or user already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User already exists
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     Error:
@@ -589,3 +649,30 @@ components:
           type: integer
           description: Estimated delivery time in days
           example: 3
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User unique identifier
+          example: 1
+        name:
+          type: string
+          description: User's full name
+          example: João Silva
+        email:
+          type: string
+          format: email
+          description: User's email address
+          example: joao.silva@example.com
+
+    UserResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          nullable: true
+          description: Error message (null if success)
+        user:
+          $ref: '#/components/schemas/User'

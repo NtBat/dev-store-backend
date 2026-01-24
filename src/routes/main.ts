@@ -4,6 +4,7 @@ import * as productController from '../controllers/product';
 import * as categoryController from '../controllers/category';
 import * as cartController from '../controllers/cart';
 import * as shippingController from '../controllers/shipping';
+import * as userController from '../controllers/user';
 export const routes = Router();
 
 routes.get('/ping', (_, res: Response) => {
@@ -17,3 +18,4 @@ routes.get('/products/:id/related', productController.getProductRelated);
 routes.get('/category/:slug/metadata', categoryController.getCategoryWithMetadata);
 routes.post('/cart/mount', cartController.createCart);
 routes.get('/cart/shipping', shippingController.getCartShipping);
+routes.post('/user/register', userController.createUser);
