@@ -5,6 +5,7 @@ import * as categoryController from '../controllers/category';
 import * as cartController from '../controllers/cart';
 import * as shippingController from '../controllers/shipping';
 import * as userController from '../controllers/user';
+import { authMiddleware } from '../middleware/auth';
 export const routes = Router();
 
 routes.get('/ping', (_, res: Response) => {
@@ -20,3 +21,4 @@ routes.post('/cart/mount', cartController.createCart);
 routes.get('/cart/shipping', shippingController.getCartShipping);
 routes.post('/user/register', userController.createUser);
 routes.post('/user/login', userController.loginUser);
+routes.post('/user/addresses', authMiddleware, userController.createUserAddress);

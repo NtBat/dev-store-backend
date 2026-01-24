@@ -479,6 +479,100 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /user/addresses:
+    post:
+      summary: Add user address
+      description: Creates a new address for the authenticated user. Requires authentication token in the Authorization header.
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - zipcode
+                - street
+                - number
+                - city
+                - state
+                - country
+              properties:
+                zipcode:
+                  type: string
+                  minLength: 8
+                  description: Address zipcode/postal code (minimum 8 characters)
+                  example: '01310100'
+                street:
+                  type: string
+                  minLength: 3
+                  description: Street name (minimum 3 characters)
+                  example: Av. Paulista
+                number:
+                  type: string
+                  minLength: 1
+                  description: Street number
+                  example: '1000'
+                city:
+                  type: string
+                  minLength: 3
+                  description: City name (minimum 3 characters)
+                  example: São Paulo
+                state:
+                  type: string
+                  minLength: 2
+                  description: State/Province (minimum 2 characters)
+                  example: SP
+                country:
+                  type: string
+                  minLength: 2
+                  description: Country (minimum 2 characters)
+                  example: BR
+                complement:
+                  type: string
+                  description: Additional address information (optional)
+                  example: Apto 101
+      responses:
+        '201':
+          description: Address created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddressResponse'
+        '400':
+          description: Invalid request body
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid request body
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+        '500':
+          description: Internal server error or failed to create address
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to create user address
+
 components:
   schemas:
     Error:
@@ -751,3 +845,69 @@ components:
           format: uuid
           description: Authentication token (UUID v4) stored in database
           example: 550e8400-e29b-41d4-a716-446655440000
+
+    Address:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Address unique identifier
+          example: 1
+        userId:
+          type: integer
+          description: User ID owner of this address
+          example: 1
+        zipcode:
+          type: string
+          description: Address zipcode/postal code
+          example: '01310100'
+        street:
+          type: string
+          description: Street name
+          example: Av. Paulista
+        number:
+          type: string
+          description: Street number
+          example: '1000'
+        city:
+          type: string
+          description: City name
+          example: São Paulo
+        state:
+          type: string
+          description: State/Province
+          example: SP
+        country:
+          type: string
+          description: Country
+          example: BR
+        complement:
+          type: string
+          nullable: true
+          description: Additional address information
+          example: Apto 101
+        createdAt:
+          type: string
+          format: date-time
+          description: Address creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Address last update timestamp
+
+    AddressResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          nullable: true
+          description: Error message (null if success)
+        address:
+          $ref: '#/components/schemas/Address'
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: UUID
+      description: Authentication token obtained from /user/login endpoint

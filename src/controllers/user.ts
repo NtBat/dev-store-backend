@@ -1,6 +1,9 @@
 import { RequestHandler, Request, Response } from 'express';
 import { createUserSchema, loginUserSchema } from '../schemas/user-schema';
 import { createUser as createUserService, loginUser as loginUserService } from '../services/user';
+import { addAddressSchema } from '../schemas/add-address-schema';
+import { createUserAddress as createUserAddressService } from '../services/user';
+import { Address } from '../types/address';
 
 export const createUser: RequestHandler = async (req: Request, res: Response) => {
   const parseResult = createUserSchema.safeParse(req.body);
@@ -35,4 +38,36 @@ export const loginUser: RequestHandler = async (req: Request, res: Response) => 
   }
 
   res.json({ error: null, token });
+};
+
+export const createUserAddress: RequestHandler = async (req: Request, res: Response) => {
+  const userId = (req as any).userId;
+  if (!userId) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
+
+  const parseResult = addAddressSchema.safeParse(req.body);
+  if (!parseResult.success) {
+    res.status(400).json({ error: 'Invalid request body' });
+    return;
+  }
+
+  const { zipcode, street, number, city, state, country, complement } = parseResult.data;
+  const address: Address = {
+    zipcode,
+    street,
+    number,
+    city,
+    state,
+    country,
+    complement: complement || '',
+  };
+  const userAddress = await createUserAddressService(userId, address);
+  if (!userAddress) {
+    res.status(500).json({ error: 'Failed to create user address' });
+    return;
+  }
+
+  res.status(201).json({ error: null, address: userAddress });
 };
