@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from '../libs/prisma';
+import { v4 } from 'uuid';
 
 export const createUser = async (name: string, email: string, password: string) => {
   const existingUser = await prisma.user.findUnique({
@@ -25,4 +26,32 @@ export const createUser = async (name: string, email: string, password: string) 
     name: user.name,
     email: user.email,
   };
+};
+
+export const loginUser = async (email: string, password: string) => {
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    return null;
+  }
+
+  const token = v4();
+
+  const updatedUser = await prisma.user.update({
+    where: { id: user.id },
+    data: { token },
+  });
+
+  if (!updatedUser) {
+    return null;
+  }
+
+  return token;
 };
