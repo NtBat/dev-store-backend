@@ -21,6 +21,8 @@ tags:
     description: Product management and catalog
   - name: Categories
     description: Category management and metadata
+  - name: Cart
+    description: Shopping cart operations
 
 paths:
   /ping:
@@ -258,6 +260,63 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /cart/mount:
+    post:
+      summary: Mount shopping cart
+      description: Retrieves product details for a list of product IDs. Used to mount/validate a shopping cart with current product information (price, availability, etc.). Does not persist cart data in the database.
+      tags:
+        - Cart
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ids
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                    pattern: '^\d+$'
+                  description: Array of product IDs (as strings)
+                  example: ["1", "2", "3"]
+                  minItems: 0
+      responses:
+        '200':
+          description: Successful response with cart products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CartResponse'
+        '400':
+          description: Invalid request body (missing ids or invalid format)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid request body
+        '404':
+          description: Cart not found (unlikely, but possible in edge cases)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Cart not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
     Error:
@@ -434,3 +493,38 @@ components:
           items:
             $ref: '#/components/schemas/CategoryMetadata'
           description: Array of metadata fields with their possible values
+
+    CartProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Product unique identifier
+          example: 1
+        label:
+          type: string
+          description: Product name/label
+          example: Camisa React
+        price:
+          type: number
+          format: float
+          description: Current product price
+          example: 94.5
+        image:
+          type: string
+          nullable: true
+          description: Product image URL (first image)
+          example: http://localhost:3333/media/products/camiseta-react-azul.png
+
+    CartResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          nullable: true
+          description: Error message (null if success)
+        cart:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartProduct'
+          description: Array of products in the cart with current information
