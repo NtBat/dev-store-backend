@@ -82,3 +82,11 @@ export const getConstructEvent = async (rawBody: string, signature: string, webh
     return null;
   }
 };
+
+export const getStripeCheckoutSession = async (sessionId: string) => {
+  try {
+    return stripe.checkout.sessions.retrieve(sessionId);
+  } catch {
+    return null;
+  }
+};

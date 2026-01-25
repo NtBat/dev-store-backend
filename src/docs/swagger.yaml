@@ -25,6 +25,8 @@ tags:
     description: Shopping cart operations
   - name: Users
     description: User authentication and management
+  - name: Orders
+    description: Order management and history
   - name: Webhooks
     description: External service webhooks (not for direct use)
 
@@ -768,6 +770,42 @@ paths:
                     type: string
                     example: Failed to get user addresses
 
+  /user/orders:
+    get:
+      summary: Get user orders
+      description: Retrieves all orders for the authenticated user, ordered by creation date (newest first). Returns order ID, status, total price, and creation date.
+      tags:
+        - Orders
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Orders retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrdersListResponse'
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+        '500':
+          description: Internal server error or failed to get orders
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get orders
+
 components:
   schemas:
     Error:
@@ -1125,6 +1163,45 @@ components:
           format: uri
           description: Stripe Checkout session URL for payment
           example: https://checkout.stripe.com/pay/cs_test_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Order unique identifier
+          example: 1
+        status:
+          type: string
+          enum:
+            - pending
+            - paid
+            - cancelled
+          description: Order payment status
+          example: paid
+        total:
+          type: number
+          format: float
+          description: Order total amount (including shipping)
+          example: 209.8
+        createdAt:
+          type: string
+          format: date-time
+          description: Order creation timestamp
+          example: '2024-01-22T12:00:00.000Z'
+
+    OrdersListResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          nullable: true
+          description: Error message (null if success)
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+          description: List of user orders ordered by creation date (newest first)
 
   securitySchemes:
     BearerAuth:
