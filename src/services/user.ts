@@ -94,3 +94,19 @@ export const getUserAddresses = async (userId: number) => {
     orderBy: { createdAt: 'desc' },
   });
 };
+
+export const getUserAddressById = async (userId: number, addressId: number) => {
+  return await prisma.userAddress.findUnique({
+    where: { id: addressId, userId },
+    select: {
+      id: true,
+      zipcode: true,
+      street: true,
+      number: true,
+      city: true,
+      state: true,
+      country: true,
+      complement: true,
+    },
+  });
+};
