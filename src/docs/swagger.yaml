@@ -25,6 +25,8 @@ tags:
     description: Shopping cart operations
   - name: Users
     description: User authentication and management
+  - name: Webhooks
+    description: External service webhooks (not for direct use)
 
 paths:
   /ping:
@@ -460,6 +462,63 @@ paths:
                   error:
                     type: string
                     example: Failed to create order
+
+  /webhook/stripe:
+    post:
+      summary: Stripe webhook endpoint
+      description: |
+        **⚠️ FOR REFERENCE ONLY - NOT FOR DIRECT USE**
+        
+        This endpoint is called automatically by Stripe when payment events occur.
+        It should be configured in your Stripe Dashboard under Webhooks.
+        
+        **DO NOT call this endpoint manually** - it requires a valid Stripe signature.
+        
+        Supported events:
+        - `checkout.session.completed` → Updates order status to 'paid'
+        - `checkout.session.async_payment_succeeded` → Updates order status to 'paid'
+        - `checkout.session.expired` → Updates order status to 'cancelled'
+        - `checkout.session.async_payment_failed` → Updates order status to 'cancelled'
+        - `payment_intent.payment_failed` → Updates order status to 'cancelled'
+      tags:
+        - Webhooks
+      parameters:
+        - in: header
+          name: stripe-signature
+          required: true
+          schema:
+            type: string
+          description: Stripe signature for webhook verification (automatically sent by Stripe)
+      requestBody:
+        required: true
+        description: Stripe event payload (automatically sent by Stripe)
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Stripe event object (format defined by Stripe)
+      responses:
+        '200':
+          description: Webhook processed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    nullable: true
+                    example: null
+        '400':
+          description: Invalid signature or missing required data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing Stripe signature
 
   /user/register:
     post:
