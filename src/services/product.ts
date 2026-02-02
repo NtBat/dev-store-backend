@@ -58,6 +58,7 @@ export const getAllProducts = async (filters: ProductFilters) => {
     select: {
       id: true,
       label: true,
+      labelEn: true,
       price: true,
       images: {
         take: 1,
@@ -84,8 +85,10 @@ export const getProduct = async (id: number) => {
     select: {
       id: true,
       label: true,
+      labelEn: true,
       price: true,
       description: true,
+      descriptionEn: true,
       categoryId: true,
       images: true,
     },
@@ -130,6 +133,7 @@ export const getProductsFromSameCategory = async (id: number, limit: number = 4)
     select: {
       id: true,
       label: true,
+      labelEn: true,
       price: true,
       images: {
         take: 1,

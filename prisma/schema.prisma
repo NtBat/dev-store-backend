@@ -50,19 +50,21 @@ model Banner {
 }
 
 model Product {
-  id          Int               @id @default(autoincrement())
-  label       String
-  price       Float
-  description String?
-  categoryId  Int
-  viewsCount  Int               @default(0)
-  salesCount  Int               @default(0)
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @default(now()) @updatedAt
-  images      ProductImage[]
-  metadata    ProductMetadata[]
-  category    Category?         @relation(fields: [categoryId], references: [id])
-  orders      OrderProduct[]
+  id            Int               @id @default(autoincrement())
+  label         String
+  labelEn       String?
+  price         Float
+  description   String?
+  descriptionEn String?
+  categoryId    Int
+  viewsCount    Int               @default(0)
+  salesCount    Int               @default(0)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @default(now()) @updatedAt
+  images        ProductImage[]
+  metadata      ProductMetadata[]
+  category      Category?         @relation(fields: [categoryId], references: [id])
+  orders        OrderProduct[]
 }
 
 model ProductImage {

@@ -1426,8 +1426,12 @@ paths:
               properties:
                 topbarText:
                   type: string
-                  description: Text to display in the topbar (optional)
+                  description: Text to display in the topbar in Portuguese (optional)
                   example: 🎉 Black Friday! Até 50% de desconto + Frete Grátis
+                topbarTextEn:
+                  type: string
+                  description: Text to display in the topbar in English (optional)
+                  example: 🎉 Black Friday! Up to 50% off + Free Shipping
                 instagram:
                   type: string
                   format: uri
@@ -1448,6 +1452,14 @@ paths:
                   format: uri
                   description: WhatsApp contact link (optional)
                   example: https://wa.me/5511987654321
+                copyright:
+                  type: string
+                  description: Copyright text in Portuguese (optional)
+                  example: © 2026 DevStore. Todos os direitos reservados.
+                copyrightEn:
+                  type: string
+                  description: Copyright text in English (optional)
+                  example: © 2026 DevStore. All rights reserved.
       responses:
         '200':
           description: Store information updated successfully
@@ -1511,11 +1523,19 @@ paths:
                   example: gift
                 title:
                   type: string
-                  description: Benefit title
+                  description: Benefit title in Portuguese
+                  example: Embalagem para presente
+                titleEn:
+                  type: string
+                  description: Benefit title in English (optional)
                   example: Gift wrapping
                 description:
                   type: string
-                  description: Benefit description
+                  description: Benefit description in Portuguese
+                  example: Embalagem gratuita para todos os pedidos
+                descriptionEn:
+                  type: string
+                  description: Benefit description in English (optional)
                   example: Free gift wrapping for all orders
                 order:
                   type: integer
@@ -1598,12 +1618,20 @@ paths:
                   example: truck
                 title:
                   type: string
-                  description: Benefit title (optional)
+                  description: Benefit title in Portuguese (optional)
                   example: Frete grátis
+                titleEn:
+                  type: string
+                  description: Benefit title in English (optional)
+                  example: Free shipping
                 description:
                   type: string
-                  description: Benefit description (optional)
+                  description: Benefit description in Portuguese (optional)
                   example: Frete grátis em pedidos acima de R$ 299
+                descriptionEn:
+                  type: string
+                  description: Benefit description in English (optional)
+                  example: Free shipping on orders over $299
                 order:
                   type: integer
                   description: Display order (optional)
@@ -1744,8 +1772,13 @@ components:
           example: 1
         label:
           type: string
-          description: Product name/label
+          description: Product name in Portuguese (default)
           example: Camisa React
+        labelEn:
+          type: string
+          nullable: true
+          description: Product name in English (optional)
+          example: React Shirt
         price:
           type: number
           format: float
@@ -1782,8 +1815,13 @@ components:
           example: 1
         label:
           type: string
-          description: Product name/label
+          description: Product name in Portuguese (default)
           example: Camisa React
+        labelEn:
+          type: string
+          nullable: true
+          description: Product name in English (optional)
+          example: React Shirt
         price:
           type: number
           format: float
@@ -1792,8 +1830,13 @@ components:
         description:
           type: string
           nullable: true
-          description: Detailed product description
+          description: Detailed product description in Portuguese
           example: Camisa com logo do React, ideal para front-end developers
+        descriptionEn:
+          type: string
+          nullable: true
+          description: Detailed product description in English (optional)
+          example: React logo shirt, ideal for front-end developers
         categoryId:
           type: integer
           description: Category ID reference
@@ -1977,8 +2020,13 @@ components:
           example: 1
         label:
           type: string
-          description: Product name/label
+          description: Product name in Portuguese (default)
           example: Camisa React
+        labelEn:
+          type: string
+          nullable: true
+          description: Product name in English (optional)
+          example: React Shirt
         price:
           type: number
           format: float
@@ -2205,11 +2253,21 @@ components:
           example: truck
         title:
           type: string
-          description: Benefit title
+          description: Benefit title in Portuguese (default)
+          example: Frete grátis
+        titleEn:
+          type: string
+          nullable: true
+          description: Benefit title in English (optional)
           example: Free shipping
         description:
           type: string
-          description: Benefit description
+          description: Benefit description in Portuguese (default)
+          example: Frete grátis em pedidos acima de R$ 299
+        descriptionEn:
+          type: string
+          nullable: true
+          description: Benefit description in English (optional)
           example: Free shipping on orders over $299
         order:
           type: integer
@@ -2234,8 +2292,13 @@ components:
         topbarText:
           type: string
           nullable: true
-          description: Text to display in the topbar
+          description: Text to display in the topbar in Portuguese
           example: Frete grátis para compras acima de R$ 299
+        topbarTextEn:
+          type: string
+          nullable: true
+          description: Text to display in the topbar in English (optional)
+          example: Free shipping on orders over $299
         instagram:
           type: string
           nullable: true
@@ -2263,8 +2326,13 @@ components:
         copyright:
           type: string
           nullable: true
-          description: Copyright text
-          example: null
+          description: Copyright text in Portuguese
+          example: © 2026 DevStore. Todos os direitos reservados.
+        copyrightEn:
+          type: string
+          nullable: true
+          description: Copyright text in English (optional)
+          example: © 2026 DevStore. All rights reserved.
         createdAt:
           type: string
           format: date-time
@@ -2284,8 +2352,13 @@ components:
         topbarText:
           type: string
           nullable: true
-          description: Text to display in the topbar
+          description: Text to display in the topbar in Portuguese
           example: Frete grátis para compras acima de R$ 299
+        topbarTextEn:
+          type: string
+          nullable: true
+          description: Text to display in the topbar in English (optional)
+          example: Free shipping on orders over $299
         instagram:
           type: string
           nullable: true
@@ -2313,8 +2386,13 @@ components:
         copyright:
           type: string
           nullable: true
-          description: Copyright text
-          example: null
+          description: Copyright text in Portuguese
+          example: © 2026 DevStore. Todos os direitos reservados.
+        copyrightEn:
+          type: string
+          nullable: true
+          description: Copyright text in English (optional)
+          example: © 2026 DevStore. All rights reserved.
         createdAt:
           type: string
           format: date-time
@@ -2339,8 +2417,13 @@ components:
         topbarText:
           type: string
           nullable: true
-          description: Text to display in the topbar
+          description: Text to display in the topbar in Portuguese
           example: 🎉 Black Friday! Até 50% de desconto + Frete Grátis
+        topbarTextEn:
+          type: string
+          nullable: true
+          description: Text to display in the topbar in English (optional)
+          example: 🎉 Black Friday! Up to 50% off + Free Shipping
         instagram:
           type: string
           nullable: true
@@ -2368,8 +2451,13 @@ components:
         copyright:
           type: string
           nullable: true
-          description: Copyright text
-          example: null
+          description: Copyright text in Portuguese
+          example: © 2026 DevStore. Todos os direitos reservados.
+        copyrightEn:
+          type: string
+          nullable: true
+          description: Copyright text in English (optional)
+          example: © 2026 DevStore. All rights reserved.
         createdAt:
           type: string
           format: date-time
