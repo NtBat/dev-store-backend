@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { getUserIdByToken } from '../services/user';
+import { getUserByToken } from '../services/user';
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -16,12 +16,24 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
 
   const token = tokenSplit[1];
 
-  const userId = await getUserIdByToken(token);
-  if (!userId) {
+  const user = await getUserByToken(token);
+  if (!user) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }
 
-  (req as any).userId = userId;
+  (req as any).userId = user.id;
+  (req as any).userRole = user.role;
+  next();
+};
+
+export const adminMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  const userRole = (req as any).userRole;
+
+  if (!userRole || userRole !== 'admin') {
+    res.status(403).json({ error: 'Access denied. Admin only.' });
+    return;
+  }
+
   next();
 };

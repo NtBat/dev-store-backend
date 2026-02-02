@@ -1,0 +1,281 @@
+{
+  "info": {
+    "name": "DevStore - Categories Admin",
+    "_postman_id": "category-admin-collection",
+    "description": "Admin endpoints for managing categories, metadata, and values",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/categories",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "categories"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Create Category",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bonés\",\n  \"nameEn\": \"Caps\",\n  \"slug\": \"bones\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/categories",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "categories"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Bonés e Chapéus\",\n  \"nameEn\": \"Caps and Hats\",\n  \"slug\": \"bones-chapeus\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/categories/2",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "categories", "2"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/categories/2",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "categories", "2"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Category Metadata",
+      "item": [
+        {
+          "name": "Create Category Metadata",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"size\",\n  \"name\": \"Tamanho\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/categories/1/metadata",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "categories", "1", "metadata"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Category Metadata",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Tamanhos Disponíveis\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/categories/metadata/size",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "categories", "metadata", "size"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Category Metadata",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/categories/metadata/size",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "categories", "metadata", "size"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Metadata Values",
+      "item": [
+        {
+          "name": "Create Metadata Value",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"medium\",\n  \"label\": \"M\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/categories/metadata/size/values",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "categories", "metadata", "size", "values"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Metadata Value",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"label\": \"Médio\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/categories/metadata/values/medium",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "categories", "metadata", "values", "medium"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Metadata Value",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/categories/metadata/values/medium",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "categories", "metadata", "values", "medium"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3333",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "seu-token-admin-aqui",
+      "type": "string"
+    }
+  ]
+}

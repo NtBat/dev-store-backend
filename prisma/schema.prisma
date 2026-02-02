@@ -19,6 +19,7 @@ model User {
   email     String        @unique
   password  String
   token     String?
+  role      String        @default("customer")
   createdAt DateTime      @default(now())
   updatedAt DateTime      @default(now()) @updatedAt
   addresses UserAddress[]
@@ -87,6 +88,7 @@ model Category {
   id        Int                @id @default(autoincrement())
   slug      String             @unique
   name      String
+  nameEn    String?
   createdAt DateTime           @default(now())
   updatedAt DateTime           @default(now()) @updatedAt
   products  Product[]
@@ -142,4 +144,33 @@ model OrderProduct {
   updatedAt DateTime @default(now()) @updatedAt
   order     Order    @relation(fields: [orderId], references: [id])
   product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Store {
+  id            Int            @id @default(autoincrement())
+  topbarText    String?
+  topbarTextEn  String?
+  instagram     String?
+  facebook      String?
+  email         String?
+  whatsapp      String?
+  copyright     String?
+  copyrightEn   String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @default(now()) @updatedAt
+  features      StoreBenefit[]
+}
+
+model StoreBenefit {
+  id            Int      @id @default(autoincrement())
+  storeId       Int
+  iconName      String
+  title         String
+  titleEn       String?
+  description   String
+  descriptionEn String?
+  order         Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+  store         Store    @relation(fields: [storeId], references: [id])
 }

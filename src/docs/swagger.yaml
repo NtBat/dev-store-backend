@@ -27,6 +27,10 @@ tags:
     description: User authentication and management
   - name: Orders
     description: Order management and history
+  - name: Store
+    description: Store information and settings
+  - name: Admin
+    description: Administrative endpoints (requires admin role)
   - name: Webhooks
     description: External service webhooks (not for direct use)
 
@@ -259,6 +263,581 @@ paths:
                   error:
                     type: string
                     example: Category not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/categories:
+    get:
+      summary: Get all categories
+      description: Retrieves all categories with product count. Requires admin authentication.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryAdmin'
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      summary: Create category
+      description: Creates a new category. Slug must be unique. Requires admin authentication. nameEn is optional for English translation.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - slug
+              properties:
+                name:
+                  type: string
+                  description: Category display name in Portuguese
+                  example: Camisas
+                nameEn:
+                  type: string
+                  description: Category display name in English (optional)
+                  example: Shirts
+                slug:
+                  type: string
+                  description: Category URL slug (must be unique)
+                  example: camisas
+      responses:
+        '201':
+          description: Category created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          description: Invalid request or slug already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Category with this slug already exists
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/categories/{id}:
+    put:
+      summary: Update category
+      description: Updates an existing category. If updating slug, it must remain unique. Requires admin authentication. nameEn can be updated to change English translation.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: Category ID
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Category display name in Portuguese (optional)
+                  example: Camisetas
+                nameEn:
+                  type: string
+                  description: Category display name in English (optional)
+                  example: T-Shirts
+                slug:
+                  type: string
+                  description: Category URL slug (optional)
+                  example: camisetas
+      responses:
+        '200':
+          description: Category updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '400':
+          description: Slug already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Category with this slug already exists
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete category
+      description: Deletes a category. Cannot delete if category has products. Requires admin authentication.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: Category ID
+          example: 1
+      responses:
+        '200':
+          description: Category deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '400':
+          description: Cannot delete category with products or category not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Cannot delete category with products
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/categories/{categoryId}/metadata:
+    post:
+      summary: Create category metadata
+      description: Creates a new metadata field (filter) for a category. ID must be unique. Requires admin authentication.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: categoryId
+          required: true
+          schema:
+            type: integer
+          description: Category ID
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - name
+              properties:
+                id:
+                  type: string
+                  description: Metadata unique identifier (e.g., 'size', 'color')
+                  example: size
+                name:
+                  type: string
+                  description: Metadata display name
+                  example: Tamanho
+      responses:
+        '201':
+          description: Metadata created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryMetadataItem'
+        '400':
+          description: Invalid request or metadata id already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Metadata with this id already exists
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/categories/metadata/{id}:
+    put:
+      summary: Update category metadata
+      description: Updates an existing category metadata field. Requires admin authentication.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Metadata ID
+          example: size
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  description: Metadata display name
+                  example: Tamanhos Disponíveis
+      responses:
+        '200':
+          description: Metadata updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryMetadataItem'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete category metadata
+      description: Deletes a category metadata field and all its values. Requires admin authentication.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Metadata ID
+          example: size
+      responses:
+        '200':
+          description: Metadata deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/categories/metadata/{metadataId}/values:
+    post:
+      summary: Create metadata value
+      description: Creates a new value for a metadata field. ID must be unique. Requires admin authentication.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: metadataId
+          required: true
+          schema:
+            type: string
+          description: Metadata ID
+          example: size
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+                - label
+              properties:
+                id:
+                  type: string
+                  description: Value unique identifier (e.g., 'small', 'medium')
+                  example: medium
+                label:
+                  type: string
+                  description: Value display label
+                  example: M
+      responses:
+        '201':
+          description: Value created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataValueItem'
+        '400':
+          description: Invalid request or value id already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Metadata value with this id already exists
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/categories/metadata/values/{id}:
+    put:
+      summary: Update metadata value
+      description: Updates an existing metadata value. Requires admin authentication.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Value ID
+          example: medium
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - label
+              properties:
+                label:
+                  type: string
+                  description: Value display label
+                  example: Médio
+      responses:
+        '200':
+          description: Value updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MetadataValueItem'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete metadata value
+      description: Deletes a metadata value. Requires admin authentication.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: Value ID
+          example: medium
+      responses:
+        '200':
+          description: Value deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           description: Internal server error
           content:
@@ -806,6 +1385,323 @@ paths:
                     type: string
                     example: Failed to get orders
 
+  /store:
+    get:
+      summary: Get store information
+      description: Retrieves store information including topbar text, social media links, and store benefits/features. This is a public endpoint that doesn't require authentication.
+      tags:
+        - Store
+      responses:
+        '200':
+          description: Store information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreResponse'
+        '500':
+          description: Internal server error or failed to get store info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get store info
+
+  /admin/store:
+    put:
+      summary: Update store information
+      description: Updates store information including topbar text and social media links. Requires admin authentication. All fields are optional - only provided fields will be updated.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                topbarText:
+                  type: string
+                  description: Text to display in the topbar (optional)
+                  example: 🎉 Black Friday! Até 50% de desconto + Frete Grátis
+                instagram:
+                  type: string
+                  format: uri
+                  description: Instagram profile URL (optional)
+                  example: https://instagram.com/devstore
+                facebook:
+                  type: string
+                  format: uri
+                  description: Facebook page URL (optional)
+                  example: https://facebook.com/devstore
+                email:
+                  type: string
+                  format: email
+                  description: Store contact email (optional)
+                  example: contato@devstore.com
+                whatsapp:
+                  type: string
+                  format: uri
+                  description: WhatsApp contact link (optional)
+                  example: https://wa.me/5511987654321
+      responses:
+        '200':
+          description: Store information updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreInfoResponse'
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Access denied. Admin only.
+        '500':
+          description: Internal server error or failed to update store info
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to update store info
+
+  /admin/store/benefits:
+    post:
+      summary: Create store benefit
+      description: Creates a new store benefit/feature to be displayed on the store. Requires admin authentication. Benefits are used to highlight store advantages (e.g., free shipping, 24/7 support).
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - iconName
+                - title
+                - description
+              properties:
+                iconName:
+                  type: string
+                  description: Icon name from lucide-react library (e.g., 'truck', 'shield-check', 'headphones')
+                  example: gift
+                title:
+                  type: string
+                  description: Benefit title
+                  example: Gift wrapping
+                description:
+                  type: string
+                  description: Benefit description
+                  example: Free gift wrapping for all orders
+                order:
+                  type: integer
+                  description: Display order (optional, defaults to 0)
+                  example: 5
+      responses:
+        '200':
+          description: Benefit created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreBenefit'
+        '400':
+          description: Invalid request body - missing required fields
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: iconName, title and description are required
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Access denied. Admin only.
+        '500':
+          description: Internal server error or failed to create benefit
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to create store benefit
+
+  /admin/store/benefits/{id}:
+    put:
+      summary: Update store benefit
+      description: Updates an existing store benefit. Requires admin authentication. All fields are optional - only provided fields will be updated.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: Benefit unique identifier
+          example: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                iconName:
+                  type: string
+                  description: Icon name from lucide-react library (optional)
+                  example: truck
+                title:
+                  type: string
+                  description: Benefit title (optional)
+                  example: Frete grátis
+                description:
+                  type: string
+                  description: Benefit description (optional)
+                  example: Frete grátis em pedidos acima de R$ 299
+                order:
+                  type: integer
+                  description: Display order (optional)
+                  example: 1
+      responses:
+        '200':
+          description: Benefit updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoreBenefit'
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Access denied. Admin only.
+        '500':
+          description: Internal server error or failed to update benefit
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to update store benefit
+    delete:
+      summary: Delete store benefit
+      description: Deletes a store benefit by ID. Requires admin authentication.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: Benefit unique identifier
+          example: 5
+      responses:
+        '200':
+          description: Benefit deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Unauthorized
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Access denied. Admin only.
+        '500':
+          description: Internal server error or failed to delete benefit
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to delete store benefit
+
 components:
   schemas:
     Error:
@@ -920,12 +1816,101 @@ components:
           example: 1
         name:
           type: string
-          description: Category name
+          description: Category name in Portuguese (default)
           example: Camisas
+        nameEn:
+          type: string
+          nullable: true
+          description: Category name in English (optional)
+          example: Shirts
         slug:
           type: string
           description: Category URL slug
           example: camisas
+
+    CategoryAdmin:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Category unique identifier
+          example: 1
+        name:
+          type: string
+          description: Category name in Portuguese (default)
+          example: Camisas
+        nameEn:
+          type: string
+          nullable: true
+          description: Category name in English (optional)
+          example: Shirts
+        slug:
+          type: string
+          description: Category URL slug
+          example: camisas
+        createdAt:
+          type: string
+          format: date-time
+          description: Category creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Category last update timestamp
+        _count:
+          type: object
+          properties:
+            products:
+              type: integer
+              description: Number of products in this category
+              example: 5
+
+    CategoryMetadataItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Metadata unique identifier
+          example: tech
+        name:
+          type: string
+          description: Metadata display name
+          example: Tecnologia
+        categoryId:
+          type: integer
+          description: Category ID this metadata belongs to
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          description: Metadata creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Metadata last update timestamp
+
+    MetadataValueItem:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Value unique identifier
+          example: react
+        label:
+          type: string
+          description: Value display label
+          example: React
+        categoryMetadataId:
+          type: string
+          description: Metadata ID this value belongs to
+          example: tech
+        createdAt:
+          type: string
+          format: date-time
+          description: Value creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Value last update timestamp
 
     ProductDetailResponse:
       type: object
@@ -1202,6 +2187,197 @@ components:
           items:
             $ref: '#/components/schemas/Order'
           description: List of user orders ordered by creation date (newest first)
+
+    StoreBenefit:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Benefit unique identifier
+          example: 1
+        storeId:
+          type: integer
+          description: Store ID this benefit belongs to
+          example: 1
+        iconName:
+          type: string
+          description: Icon name from lucide-react library
+          example: truck
+        title:
+          type: string
+          description: Benefit title
+          example: Free shipping
+        description:
+          type: string
+          description: Benefit description
+          example: Free shipping on orders over $299
+        order:
+          type: integer
+          description: Display order
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          description: Benefit creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Benefit last update timestamp
+
+    StoreInfo:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Store unique identifier
+          example: 1
+        topbarText:
+          type: string
+          nullable: true
+          description: Text to display in the topbar
+          example: Frete grátis para compras acima de R$ 299
+        instagram:
+          type: string
+          nullable: true
+          format: uri
+          description: Instagram profile URL
+          example: https://instagram.com/devstore
+        facebook:
+          type: string
+          nullable: true
+          format: uri
+          description: Facebook page URL
+          example: https://facebook.com/devstore
+        email:
+          type: string
+          nullable: true
+          format: email
+          description: Store contact email
+          example: contato@devstore.com
+        whatsapp:
+          type: string
+          nullable: true
+          format: uri
+          description: WhatsApp contact link
+          example: https://wa.me/5511987654321
+        copyright:
+          type: string
+          nullable: true
+          description: Copyright text
+          example: null
+        createdAt:
+          type: string
+          format: date-time
+          description: Store creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Store last update timestamp
+
+    StoreResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Store unique identifier
+          example: 1
+        topbarText:
+          type: string
+          nullable: true
+          description: Text to display in the topbar
+          example: Frete grátis para compras acima de R$ 299
+        instagram:
+          type: string
+          nullable: true
+          format: uri
+          description: Instagram profile URL
+          example: https://instagram.com/devstore
+        facebook:
+          type: string
+          nullable: true
+          format: uri
+          description: Facebook page URL
+          example: https://facebook.com/devstore
+        email:
+          type: string
+          nullable: true
+          format: email
+          description: Store contact email
+          example: contato@devstore.com
+        whatsapp:
+          type: string
+          nullable: true
+          format: uri
+          description: WhatsApp contact link
+          example: https://wa.me/5511987654321
+        copyright:
+          type: string
+          nullable: true
+          description: Copyright text
+          example: null
+        createdAt:
+          type: string
+          format: date-time
+          description: Store creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Store last update timestamp
+        features:
+          type: array
+          items:
+            $ref: '#/components/schemas/StoreBenefit'
+          description: List of store benefits/features ordered by order field
+
+    StoreInfoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Store unique identifier
+          example: 1
+        topbarText:
+          type: string
+          nullable: true
+          description: Text to display in the topbar
+          example: 🎉 Black Friday! Até 50% de desconto + Frete Grátis
+        instagram:
+          type: string
+          nullable: true
+          format: uri
+          description: Instagram profile URL
+          example: https://instagram.com/devstore
+        facebook:
+          type: string
+          nullable: true
+          format: uri
+          description: Facebook page URL
+          example: https://facebook.com/devstore
+        email:
+          type: string
+          nullable: true
+          format: email
+          description: Store contact email
+          example: contato@devstore.com.br
+        whatsapp:
+          type: string
+          nullable: true
+          format: uri
+          description: WhatsApp contact link
+          example: https://wa.me/5511987654321
+        copyright:
+          type: string
+          nullable: true
+          description: Copyright text
+          example: null
+        createdAt:
+          type: string
+          format: date-time
+          description: Store creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Store last update timestamp
 
   securitySchemes:
     BearerAuth:

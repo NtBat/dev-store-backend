@@ -778,3 +778,7 @@ The webhook endpoint verifies the Stripe signature to ensure requests are legiti
 - [ ] Implement order bump get
 - [ ] Implement order bump delete
 - [ ] Implement order bump delete all
+- [ ] Implement price with card
+- [ ] Implement translations
+- [ ] Implement price with other currencies
+- [ ] Implement rating system

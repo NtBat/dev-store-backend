@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { PrismaClient } from '../src/generated/prisma/client.js';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
+import bcrypt from 'bcryptjs';
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -33,12 +34,94 @@ async function main() {
 
   console.log('📝 No existing data found. Proceeding with seeding...');
 
+  // Create Admin User
+  console.log('Creating admin user...');
+  const hashedPassword = await bcrypt.hash('admin123', 10);
+  const adminUser = await prisma.user.create({
+    data: {
+      name: 'Admin',
+      email: 'admin@devstore.com',
+      password: hashedPassword,
+      role: 'admin',
+    },
+  });
+  console.log('✅ Admin user created:', adminUser.email);
+  console.log('📧 Login: admin@devstore.com');
+  console.log('🔑 Password: admin123');
+
+  // Create Store
+  console.log('Creating store info...');
+  const store = await prisma.store.create({
+    data: {
+      topbarText: 'Frete grátis para compras acima de R$ 299',
+      topbarTextEn: 'Free shipping on orders over $299',
+      instagram: 'https://instagram.com/devstore',
+      facebook: 'https://facebook.com/devstore',
+      email: 'contato@devstore.com',
+      whatsapp: 'https://wa.me/5511999999999',
+      copyright: '© 2026 DevStore. Todos os direitos reservados.',
+      copyrightEn: '© 2026 DevStore. All rights reserved.',
+    },
+  });
+  console.log('✅ Store info created');
+
+  // Create Store Benefits
+  console.log('Creating store benefits...');
+  const benefits = await Promise.all([
+    prisma.storeBenefit.create({
+      data: {
+        storeId: store.id,
+        iconName: 'truck',
+        title: 'Frete grátis',
+        titleEn: 'Free shipping',
+        description: 'Frete grátis em pedidos acima de R$ 299',
+        descriptionEn: 'Free shipping on orders over $299',
+        order: 1,
+      },
+    }),
+    prisma.storeBenefit.create({
+      data: {
+        storeId: store.id,
+        iconName: 'shield-check',
+        title: 'Pagamento seguro',
+        titleEn: 'Secure payment',
+        description: 'Pagamento seguro com cartão de crédito, débito e boleto',
+        descriptionEn: 'Secure payment with credit card, debit card and boleto',
+        order: 2,
+      },
+    }),
+    prisma.storeBenefit.create({
+      data: {
+        storeId: store.id,
+        iconName: 'headphones',
+        title: 'Suporte 24/7',
+        titleEn: '24/7 support',
+        description: 'Suporte 24 horas por dia com email e telefone',
+        descriptionEn: '24/7 support with email and phone',
+        order: 3,
+      },
+    }),
+    prisma.storeBenefit.create({
+      data: {
+        storeId: store.id,
+        iconName: 'percent',
+        title: 'Descontos e promoções',
+        titleEn: 'Discounts and promotions',
+        description: 'Descontos e promoções para clientes regulares',
+        descriptionEn: 'Discounts and promotions for regular customers',
+        order: 4,
+      },
+    }),
+  ]);
+  console.log('✅ Store benefits created:', benefits.length);
+
   // Create Category
   console.log('Creating category...');
   const category = await prisma.category.create({
     data: {
       slug: 'camisas',
       name: 'Camisas',
+      nameEn: 'Shirts',
     },
   });
   console.log('✅ Category created:', category.name);
@@ -201,6 +284,10 @@ async function main() {
   console.log('✅ Product metadata created:', productMetadata.length);
 
   console.log('🎉 Database seeding completed successfully!');
+  console.log('');
+  console.log('🔐 Admin credentials:');
+  console.log('   Email: admin@devstore.com');
+  console.log('   Password: admin123');
 }
 
 main()

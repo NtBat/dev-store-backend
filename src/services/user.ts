@@ -69,6 +69,22 @@ export const getUserIdByToken = async (token: string) => {
   return user.id;
 };
 
+export const getUserByToken = async (token: string) => {
+  const user = await prisma.user.findFirst({
+    where: { token },
+    select: {
+      id: true,
+      role: true,
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  return user;
+};
+
 export const createUserAddress = async (userId: number, address: Address) => {
   return await prisma.userAddress.create({
     data: {
