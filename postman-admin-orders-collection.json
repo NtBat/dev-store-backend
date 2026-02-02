@@ -1,0 +1,203 @@
+{
+    "info": {
+        "name": "DevStore - Admin Orders",
+        "description": "Collection for testing admin order management routes",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{admin_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3333",
+            "type": "string"
+        },
+        {
+            "key": "admin_token",
+            "value": "your-admin-token-here",
+            "type": "string"
+        },
+        {
+            "key": "order_id",
+            "value": "1",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "List all orders",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/orders?page=1&limit=20",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "orders"],
+                    "query": [
+                        {
+                            "key": "page",
+                            "value": "1"
+                        },
+                        {
+                            "key": "limit",
+                            "value": "20"
+                        },
+                        {
+                            "key": "status",
+                            "value": "paid",
+                            "disabled": true,
+                            "description": "pending | paid | cancelled | shipped | delivered"
+                        },
+                        {
+                            "key": "userId",
+                            "value": "5",
+                            "disabled": true
+                        },
+                        {
+                            "key": "startDate",
+                            "value": "2026-01-01T00:00:00.000Z",
+                            "disabled": true
+                        },
+                        {
+                            "key": "endDate",
+                            "value": "2026-12-31T23:59:59.999Z",
+                            "disabled": true
+                        },
+                        {
+                            "key": "minTotal",
+                            "value": "100",
+                            "disabled": true
+                        },
+                        {
+                            "key": "maxTotal",
+                            "value": "500",
+                            "disabled": true
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get order by ID",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/orders/{{order_id}}",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "orders", "{{order_id}}"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "List orders by status (paid)",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/orders?status=paid&page=1&limit=20",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "orders"],
+                    "query": [
+                        {
+                            "key": "status",
+                            "value": "paid"
+                        },
+                        {
+                            "key": "page",
+                            "value": "1"
+                        },
+                        {
+                            "key": "limit",
+                            "value": "20"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "List orders by user",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/orders?userId=5&page=1&limit=20",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "orders"],
+                    "query": [
+                        {
+                            "key": "userId",
+                            "value": "5"
+                        },
+                        {
+                            "key": "page",
+                            "value": "1"
+                        },
+                        {
+                            "key": "limit",
+                            "value": "20"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "List orders by date range",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/orders?startDate=2026-01-01T00:00:00.000Z&endDate=2026-01-31T23:59:59.999Z",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "orders"],
+                    "query": [
+                        {
+                            "key": "startDate",
+                            "value": "2026-01-01T00:00:00.000Z"
+                        },
+                        {
+                            "key": "endDate",
+                            "value": "2026-01-31T23:59:59.999Z"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "List orders by value range",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/orders?minTotal=100&maxTotal=500",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "orders"],
+                    "query": [
+                        {
+                            "key": "minTotal",
+                            "value": "100"
+                        },
+                        {
+                            "key": "maxTotal",
+                            "value": "500"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        }
+    ]
+}

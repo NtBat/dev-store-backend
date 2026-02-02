@@ -133,12 +133,12 @@ model MetadataValue {
 }
 
 model Order {
-  id                 Int            @id @default(autoincrement())
+  id                 Int                  @id @default(autoincrement())
   userId             Int
-  status             String         @default("pending")
+  status             String               @default("pending")
   total              Float
-  shippingCost       Float          @default(0)
-  shippingDays       Int            @default(0)
+  shippingCost       Float                @default(0)
+  shippingDays       Int                  @default(0)
   shippingZipcode    String?
   shippingStreet     String?
   shippingNumber     String?
@@ -146,10 +146,21 @@ model Order {
   shippingState      String?
   shippingCountry    String?
   shippingComplement String?
-  createdAt          DateTime       @default(now())
-  updatedAt          DateTime       @default(now()) @updatedAt
+  stripeSessionId    String?
+  stripePaymentId    String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @default(now()) @updatedAt
   orderItems         OrderProduct[]
-  user               User           @relation(fields: [userId], references: [id])
+  statusHistory      OrderStatusHistory[]
+  user               User                 @relation(fields: [userId], references: [id])
+}
+
+model OrderStatusHistory {
+  id        Int      @id @default(autoincrement())
+  orderId   Int
+  status    String
+  createdAt DateTime @default(now())
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model OrderProduct {

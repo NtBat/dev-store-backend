@@ -13,6 +13,7 @@ import * as favoriteController from '../controllers/favorite';
 import * as adminUserController from '../controllers/admin/user';
 import * as adminBannerController from '../controllers/admin/banner';
 import * as adminProductController from '../controllers/admin/product';
+import * as adminOrderController from '../controllers/admin/order';
 export const routes = Router();
 
 routes.get('/ping', (_, res: Response) => {
@@ -258,3 +259,7 @@ routes.delete(
   adminMiddleware,
   adminProductController.deleteProductVariant
 );
+
+// Orders routes - Admin only
+routes.get('/admin/orders', authMiddleware, adminMiddleware, adminOrderController.getAllOrders);
+routes.get('/admin/orders/:id', authMiddleware, adminMiddleware, adminOrderController.getOrderById);
