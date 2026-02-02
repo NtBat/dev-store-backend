@@ -2369,6 +2369,456 @@ paths:
                                         type: string
                                         example: Failed to update user role
 
+    /admin/banners:
+        get:
+            summary: Get all banners
+            description: Retrieves all banners ordered by the order field. Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            responses:
+                '200':
+                    description: Banners retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        nullable: true
+                                        example: null
+                                    banners:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/BannerAdmin'
+                '401':
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '403':
+                    description: Forbidden - User is not an admin
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Access denied. Admin only.
+                '500':
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Failed to get banners
+        post:
+            summary: Create banner
+            description: Creates a new banner. Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - img
+                                - link
+                            properties:
+                                img:
+                                    type: string
+                                    description: Banner image filename
+                                    example: banner-promo.png
+                                link:
+                                    type: string
+                                    description: Link URL when banner is clicked
+                                    example: /products/react
+                                order:
+                                    type: integer
+                                    description: Display order (optional, defaults to 0)
+                                    example: 0
+            responses:
+                '200':
+                    description: Banner created successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        nullable: true
+                                        example: null
+                                    banner:
+                                        $ref: '#/components/schemas/BannerAdmin'
+                '400':
+                    description: Invalid request data
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '401':
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '403':
+                    description: Forbidden - User is not an admin
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Access denied. Admin only.
+                '500':
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Failed to create banner
+
+    /admin/banners/{id}:
+        get:
+            summary: Get banner by ID
+            description: Retrieves a specific banner by ID. Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+                  description: Banner ID
+                  example: 1
+            responses:
+                '200':
+                    description: Banner retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        nullable: true
+                                        example: null
+                                    banner:
+                                        $ref: '#/components/schemas/BannerAdmin'
+                '400':
+                    description: Invalid banner ID
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '401':
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '403':
+                    description: Forbidden - User is not an admin
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Access denied. Admin only.
+                '404':
+                    description: Banner not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Banner not found
+                '500':
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Failed to get banner
+        put:
+            summary: Update banner
+            description: Updates an existing banner. All fields are optional. Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+                  description: Banner ID
+                  example: 1
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                img:
+                                    type: string
+                                    description: Banner image filename (optional)
+                                    example: banner-promo-updated.png
+                                link:
+                                    type: string
+                                    description: Link URL when banner is clicked (optional)
+                                    example: /products/vue
+                                order:
+                                    type: integer
+                                    description: Display order (optional)
+                                    example: 1
+            responses:
+                '200':
+                    description: Banner updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        nullable: true
+                                        example: null
+                                    banner:
+                                        $ref: '#/components/schemas/BannerAdmin'
+                '400':
+                    description: Invalid request data
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '401':
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '403':
+                    description: Forbidden - User is not an admin
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Access denied. Admin only.
+                '404':
+                    description: Banner not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Banner not found
+                '500':
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Failed to update banner
+        delete:
+            summary: Delete banner
+            description: Deletes a banner from the system. This action cannot be undone. Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+                  description: Banner ID
+                  example: 1
+            responses:
+                '200':
+                    description: Banner deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        nullable: true
+                                        example: null
+                                    message:
+                                        type: string
+                                        example: Banner deleted successfully
+                '400':
+                    description: Invalid banner ID
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '401':
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '403':
+                    description: Forbidden - User is not an admin
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Access denied. Admin only.
+                '404':
+                    description: Banner not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Banner not found
+                '500':
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Failed to delete banner
+
+    /admin/banners/reorder:
+        put:
+            summary: Reorder banners
+            description: Updates the display order of multiple banners in a single request. Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - banners
+                            properties:
+                                banners:
+                                    type: array
+                                    description: Array of banner IDs with their new order
+                                    items:
+                                        type: object
+                                        required:
+                                            - id
+                                            - order
+                                        properties:
+                                            id:
+                                                type: integer
+                                                description: Banner ID
+                                                example: 1
+                                            order:
+                                                type: integer
+                                                description: New display order
+                                                example: 0
+                                    example:
+                                        - id: 1
+                                          order: 0
+                                        - id: 2
+                                          order: 1
+                                        - id: 3
+                                          order: 2
+            responses:
+                '200':
+                    description: Banners reordered successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        nullable: true
+                                        example: null
+                                    message:
+                                        type: string
+                                        example: Banners reordered successfully
+                '400':
+                    description: Invalid request data
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '401':
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '403':
+                    description: Forbidden - User is not an admin
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Access denied. Admin only.
+                '500':
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Failed to reorder banners
+
 components:
     schemas:
         Error:
@@ -3437,6 +3887,36 @@ components:
                                     nullable: true
                                     description: Date of last order
                                     example: '2026-01-20T15:30:00.000Z'
+
+    BannerAdmin:
+        type: object
+        properties:
+            id:
+                type: integer
+                description: Banner unique identifier
+                example: 1
+            img:
+                type: string
+                description: Banner image filename
+                example: banner-1.png
+            link:
+                type: string
+                description: Link URL when banner is clicked
+                example: /products/react
+            order:
+                type: integer
+                description: Display order
+                example: 0
+            createdAt:
+                type: string
+                format: date-time
+                description: Banner creation timestamp
+                example: '2026-01-15T10:30:00.000Z'
+            updatedAt:
+                type: string
+                format: date-time
+                description: Banner last update timestamp
+                example: '2026-02-01T14:20:00.000Z'
 
     securitySchemes:
         BearerAuth:

@@ -11,6 +11,7 @@ import * as orderController from '../controllers/order';
 import * as storeController from '../controllers/store';
 import * as favoriteController from '../controllers/favorite';
 import * as adminUserController from '../controllers/admin/user';
+import * as adminBannerController from '../controllers/admin/banner';
 export const routes = Router();
 
 routes.get('/ping', (_, res: Response) => {
@@ -160,3 +161,26 @@ routes.put(
   adminUserController.updateUserRole
 );
 routes.delete('/admin/users/:id', authMiddleware, adminMiddleware, adminUserController.deleteUser);
+
+// Banners routes - Admin only
+routes.get('/admin/banners', authMiddleware, adminMiddleware, adminBannerController.getAllBanners);
+routes.put('/admin/banners/reorder', authMiddleware, adminMiddleware, adminBannerController.reorderBanners);
+routes.get(
+  '/admin/banners/:id',
+  authMiddleware,
+  adminMiddleware,
+  adminBannerController.getBannerById
+);
+routes.post('/admin/banners', authMiddleware, adminMiddleware, adminBannerController.createBanner);
+routes.put(
+  '/admin/banners/:id',
+  authMiddleware,
+  adminMiddleware,
+  adminBannerController.updateBanner
+);
+routes.delete(
+  '/admin/banners/:id',
+  authMiddleware,
+  adminMiddleware,
+  adminBannerController.deleteBanner
+);
