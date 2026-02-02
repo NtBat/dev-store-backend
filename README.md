@@ -764,12 +764,12 @@ The webhook endpoint verifies the Stripe signature to ensure requests are legiti
 
 # Todo
 
+- [x] Implement wishlist post
+- [x] Implement wishlist get
+- [x] Implement wishlist delete
+
 - [ ] Implement shipping cost logic
 - [ ] Implement shipping days logic
-- [ ] Implement wishlist post
-- [ ] Implement wishlist get
-- [ ] Implement wishlist delete
-- [ ] Implement wishlist delete all
 - [ ] Implement buy together post
 - [ ] Implement buy together get
 - [ ] Implement buy together delete

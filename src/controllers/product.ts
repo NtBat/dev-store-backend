@@ -25,16 +25,18 @@ export const getProducts: RequestHandler = async (req: Request, res: Response) =
   const parsedLimit = limit ? parseInt(limit) : undefined;
   const parsedMetadata = metadata ? JSON.parse(metadata) : undefined;
 
+  const userId = (req as any).userId;
+
   const products = await getAllProducts({
     metadata: parsedMetadata,
     order: orderBy,
     limit: parsedLimit,
+    userId,
   });
 
   const productsWithAbsoluteUrl = products.map((product) => ({
     ...product,
     image: product.image ? getAbsoluteImageUrl(product.image) : null,
-    liked: false, // TODO: Implement liked logic
   }));
 
   res.json({ error: null, products: productsWithAbsoluteUrl });
@@ -49,7 +51,9 @@ export const getProductById: RequestHandler = async (req: Request, res: Response
 
   const { id } = paramsResult.data;
 
-  const product = await getProduct(parseInt(id));
+  const userId = (req as any).userId;
+
+  const product = await getProduct(parseInt(id), userId);
   if (!product) {
     res.json({ error: 'Product not found' });
     return;
@@ -79,7 +83,13 @@ export const getProductRelated: RequestHandler = async (req: Request, res: Respo
   const { id } = paramsResult.data;
   const { limit } = queryResult.data;
 
-  const products = await getProductsFromSameCategory(parseInt(id), limit ? parseInt(limit) : 4);
+  const userId = (req as any).userId;
+
+  const products = await getProductsFromSameCategory(
+    parseInt(id),
+    userId,
+    limit ? parseInt(limit) : 4
+  );
   if (!products) {
     res.status(404).json({ error: 'Products not found' });
     return;
@@ -88,7 +98,6 @@ export const getProductRelated: RequestHandler = async (req: Request, res: Respo
   const productsWithAbsoluteUrl = products.map((product) => ({
     ...product,
     image: product.image ? getAbsoluteImageUrl(product.image) : null,
-    liked: false, // TODO: Implement liked logic
   }));
 
   res.json({ error: null, products: productsWithAbsoluteUrl });

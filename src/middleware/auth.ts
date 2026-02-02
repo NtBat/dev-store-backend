@@ -27,6 +27,24 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
   next();
 };
 
+export const optionalAuthMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+  const authHeader = req.headers.authorization;
+
+  if (authHeader) {
+    const tokenSplit = authHeader.split('Bearer ');
+    if (tokenSplit[1]) {
+      const token = tokenSplit[1];
+      const user = await getUserByToken(token);
+      if (user) {
+        (req as any).userId = user.id;
+        (req as any).userRole = user.role;
+      }
+    }
+  }
+
+  next();
+};
+
 export const adminMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   const userRole = (req as any).userRole;
 

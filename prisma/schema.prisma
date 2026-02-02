@@ -24,6 +24,7 @@ model User {
   updatedAt DateTime      @default(now()) @updatedAt
   addresses UserAddress[]
   orders    Order[]
+  favorites Favorite[]
 }
 
 model UserAddress {
@@ -65,6 +66,7 @@ model Product {
   metadata      ProductMetadata[]
   category      Category?         @relation(fields: [categoryId], references: [id])
   orders        OrderProduct[]
+  favorites     Favorite[]
 }
 
 model ProductImage {
@@ -175,4 +177,15 @@ model StoreBenefit {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @default(now()) @updatedAt
   store         Store    @relation(fields: [storeId], references: [id])
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  productId Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
 }

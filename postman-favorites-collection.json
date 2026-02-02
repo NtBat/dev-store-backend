@@ -1,0 +1,158 @@
+{
+  "info": {
+    "name": "DevStore - Favorites",
+    "_postman_id": "favorites-collection",
+    "description": "Collection for testing DevStore favorites endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3333",
+      "type": "string"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Add Product to Favorites",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": 1\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/user/favorites",
+          "host": ["{{base_url}}"],
+          "path": ["user", "favorites"]
+        },
+        "description": "Add a product to the authenticated user's favorites list"
+      },
+      "response": []
+    },
+    {
+      "name": "Get User Favorites",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/user/favorites",
+          "host": ["{{base_url}}"],
+          "path": ["user", "favorites"]
+        },
+        "description": "Get all products in the authenticated user's favorites list"
+      },
+      "response": []
+    },
+    {
+      "name": "Remove Product from Favorites",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/user/favorites/1",
+          "host": ["{{base_url}}"],
+          "path": ["user", "favorites", "1"]
+        },
+        "description": "Remove a product from the authenticated user's favorites list"
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Favorites (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{admin_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/admin/favorites",
+          "host": ["{{base_url}}"],
+          "path": ["admin", "favorites"]
+        },
+        "description": "Get all favorites grouped by product with user details (Admin only)"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Products (with liked field)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}",
+            "type": "text",
+            "description": "Optional - If provided, products will include 'liked' field"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/products",
+          "host": ["{{base_url}}"],
+          "path": ["products"]
+        },
+        "description": "Get all products. If authenticated, products will include 'liked' field indicating if the user has favorited them."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Product by ID (with liked field)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{user_token}}",
+            "type": "text",
+            "description": "Optional - If provided, product will include 'liked' field"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/products/1",
+          "host": ["{{base_url}}"],
+          "path": ["products", "1"]
+        },
+        "description": "Get product by ID. If authenticated, product will include 'liked' field indicating if the user has favorited it."
+      },
+      "response": []
+    }
+  ]
+}

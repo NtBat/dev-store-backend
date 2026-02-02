@@ -4,6 +4,7 @@ type ProductFilters = {
   metadata?: { [key: string]: string };
   order?: 'views' | 'selling' | 'price';
   limit?: number;
+  userId?: number;
 };
 
 export const getAllProducts = async (filters: ProductFilters) => {
@@ -72,14 +73,31 @@ export const getAllProducts = async (filters: ProductFilters) => {
     take: filters.limit ?? undefined,
   });
 
+  let favoritedProductIds = new Set<number>();
+  if (filters.userId) {
+    const favorites = await prisma.favorite.findMany({
+      where: {
+        userId: filters.userId,
+        productId: {
+          in: products.map((p) => p.id),
+        },
+      },
+      select: {
+        productId: true,
+      },
+    });
+    favoritedProductIds = new Set(favorites.map((f) => f.productId));
+  }
+
   return products.map((product) => ({
     ...product,
     image: product.images[0].url ? `media/products/${product.images[0].url}` : null,
     images: undefined,
+    liked: favoritedProductIds.has(product.id),
   }));
 };
 
-export const getProduct = async (id: number) => {
+export const getProduct = async (id: number, userId?: number) => {
   const product = await prisma.product.findUnique({
     where: { id },
     select: {
@@ -98,10 +116,22 @@ export const getProduct = async (id: number) => {
     return null;
   }
 
+  let liked = false;
+  if (userId) {
+    const favorite = await prisma.favorite.findFirst({
+      where: {
+        userId,
+        productId: id,
+      },
+    });
+    liked = !!favorite;
+  }
+
   return {
     ...product,
     images:
       product.images.length > 0 ? product.images.map((image) => `media/products/${image.url}`) : [],
+    liked,
   };
 };
 
@@ -116,7 +146,11 @@ export const incrementProductView = async (id: number) => {
   });
 };
 
-export const getProductsFromSameCategory = async (id: number, limit: number = 4) => {
+export const getProductsFromSameCategory = async (
+  id: number,
+  userId?: number,
+  limit: number = 4
+) => {
   const product = await prisma.product.findUnique({
     where: { id },
     select: {
@@ -148,9 +182,26 @@ export const getProductsFromSameCategory = async (id: number, limit: number = 4)
     },
   });
 
+  let favoritedProductIds = new Set<number>();
+  if (userId) {
+    const favorites = await prisma.favorite.findMany({
+      where: {
+        userId,
+        productId: {
+          in: products.map((p) => p.id),
+        },
+      },
+      select: {
+        productId: true,
+      },
+    });
+    favoritedProductIds = new Set(favorites.map((f) => f.productId));
+  }
+
   return products.map((product) => ({
     ...product,
     image: product.images[0].url ? `media/products/${product.images[0].url}` : null,
     images: undefined,
+    liked: favoritedProductIds.has(product.id),
   }));
 };

@@ -25,6 +25,8 @@ tags:
     description: Shopping cart operations
   - name: Users
     description: User authentication and management
+  - name: Favorites
+    description: User favorites management
   - name: Orders
     description: Order management and history
   - name: Store
@@ -1349,6 +1351,147 @@ paths:
                     type: string
                     example: Failed to get user addresses
 
+  /user/favorites:
+    post:
+      summary: Add product to favorites
+      description: Adds a product to the authenticated user's favorites list. Requires authentication token.
+      tags:
+        - Favorites
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productId
+              properties:
+                productId:
+                  type: integer
+                  description: Product ID to add to favorites
+                  example: 1
+      responses:
+        '200':
+          description: Product added to favorites successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    nullable: true
+                    example: null
+                  message:
+                    type: string
+                    example: Product added to favorites
+        '400':
+          description: Bad request - Missing productId
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: productId is required
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to add to favorites
+    get:
+      summary: Get user favorites
+      description: Retrieves all products in the authenticated user's favorites list, ordered by creation date (newest first).
+      tags:
+        - Favorites
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Favorites retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FavoritesResponse'
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get favorites
+
+  /user/favorites/{productId}:
+    delete:
+      summary: Remove product from favorites
+      description: Removes a product from the authenticated user's favorites list. Requires authentication token.
+      tags:
+        - Favorites
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: integer
+          description: Product ID to remove from favorites
+          example: 1
+      responses:
+        '200':
+          description: Product removed from favorites successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    nullable: true
+                    example: null
+                  message:
+                    type: string
+                    example: Product removed from favorites
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to remove from favorites
+
   /user/orders:
     get:
       summary: Get user orders
@@ -1729,6 +1872,48 @@ paths:
                   error:
                     type: string
                     example: Failed to delete store benefit
+
+  /admin/favorites:
+    get:
+      summary: Get all favorites grouped by product
+      description: Retrieves all favorites grouped by product with user details. Shows which products are most favorited and by which users. Requires admin authentication.
+      tags:
+        - Admin
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Favorites retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminFavoritesResponse'
+        '401':
+          description: Unauthorized - Invalid or missing token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden - User is not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Access denied. Admin only.
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to get all favorites
 
 components:
   schemas:
@@ -2466,6 +2651,110 @@ components:
           type: string
           format: date-time
           description: Store last update timestamp
+
+    FavoriteProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Product ID
+          example: 1
+        label:
+          type: string
+          description: Product name in Portuguese
+          example: Camisa React
+        labelEn:
+          type: string
+          nullable: true
+          description: Product name in English (optional)
+          example: React Shirt
+        price:
+          type: number
+          format: float
+          description: Product price
+          example: 94.5
+        image:
+          type: string
+          nullable: true
+          description: Product image URL (first image)
+          example: http://localhost:3333/media/products/camiseta-react-azul.png
+
+    FavoriteItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Favorite record ID
+          example: 1
+        productId:
+          type: integer
+          description: Product ID
+          example: 1
+        createdAt:
+          type: string
+          format: date-time
+          description: When the product was added to favorites
+          example: '2026-02-02T15:30:00.000Z'
+        product:
+          $ref: '#/components/schemas/FavoriteProduct'
+
+    FavoritesResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          nullable: true
+          description: Error message (null if success)
+        favorites:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavoriteItem'
+          description: List of favorited products
+
+    FavoriteUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: User ID
+          example: 1
+        name:
+          type: string
+          description: User name
+          example: John Doe
+        email:
+          type: string
+          format: email
+          description: User email
+          example: john@example.com
+
+    AdminFavoriteItem:
+      type: object
+      properties:
+        product:
+          $ref: '#/components/schemas/FavoriteProduct'
+        count:
+          type: integer
+          description: Number of users who favorited this product
+          example: 3
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/FavoriteUser'
+          description: List of users who favorited this product
+
+    AdminFavoritesResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          nullable: true
+          description: Error message (null if success)
+        favorites:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminFavoriteItem'
+          description: List of products grouped by favorites with user details
 
   securitySchemes:
     BearerAuth:

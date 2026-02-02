@@ -5,10 +5,11 @@ import * as categoryController from '../controllers/category';
 import * as cartController from '../controllers/cart';
 import * as shippingController from '../controllers/shipping';
 import * as userController from '../controllers/user';
-import { authMiddleware, adminMiddleware } from '../middleware/auth';
+import { authMiddleware, adminMiddleware, optionalAuthMiddleware } from '../middleware/auth';
 import * as webhookController from '../controllers/webhook';
 import * as orderController from '../controllers/order';
 import * as storeController from '../controllers/store';
+import * as favoriteController from '../controllers/favorite';
 export const routes = Router();
 
 routes.get('/ping', (_, res: Response) => {
@@ -17,9 +18,9 @@ routes.get('/ping', (_, res: Response) => {
 
 routes.get('/banners', bannerController.getBanners);
 
-routes.get('/products', productController.getProducts);
-routes.get('/products/:id', productController.getProductById);
-routes.get('/products/:id/related', productController.getProductRelated);
+routes.get('/products', optionalAuthMiddleware, productController.getProducts);
+routes.get('/products/:id', optionalAuthMiddleware, productController.getProductById);
+routes.get('/products/:id/related', optionalAuthMiddleware, productController.getProductRelated);
 
 routes.get('/category/:slug/metadata', categoryController.getCategoryWithMetadata);
 
@@ -126,4 +127,17 @@ routes.delete(
   authMiddleware,
   adminMiddleware,
   storeController.deleteStoreBenefit
+);
+
+// Favorites routes - User
+routes.post('/user/favorites', authMiddleware, favoriteController.addToFavorites);
+routes.delete('/user/favorites/:productId', authMiddleware, favoriteController.removeFromFavorites);
+routes.get('/user/favorites', authMiddleware, favoriteController.getUserFavorites);
+
+// Favorites routes - Admin only
+routes.get(
+  '/admin/favorites',
+  authMiddleware,
+  adminMiddleware,
+  favoriteController.getAllFavoritesGrouped
 );
