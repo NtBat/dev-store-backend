@@ -34,9 +34,27 @@
             "key": "image_id",
             "value": "1",
             "type": "string"
+        },
+        {
+            "key": "variant_id",
+            "value": "1",
+            "type": "string"
         }
     ],
     "item": [
+        {
+            "name": "Get product statistics",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/products/stats",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "products", "stats"]
+                }
+            },
+            "response": []
+        },
         {
             "name": "List all products",
             "request": {
@@ -181,6 +199,63 @@
                     "raw": "{{base_url}}/admin/products/images/{{image_id}}",
                     "host": ["{{base_url}}"],
                     "path": ["admin", "products", "images", "{{image_id}}"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Add product variant",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"size\": \"M\",\n  \"stock\": 50\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/admin/products/{{product_id}}/variants",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "products", "{{product_id}}", "variants"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Update variant stock",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"stock\": 75\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/admin/products/variants/{{variant_id}}",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "products", "variants", "{{variant_id}}"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Delete product variant",
+            "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/products/variants/{{variant_id}}",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "products", "variants", "{{variant_id}}"]
                 }
             },
             "response": []

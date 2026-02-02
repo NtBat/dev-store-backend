@@ -193,6 +193,12 @@ routes.delete(
 
 // Products routes - Admin only
 routes.get(
+  '/admin/products/stats',
+  authMiddleware,
+  adminMiddleware,
+  adminProductController.getProductStats
+);
+routes.get(
   '/admin/products',
   authMiddleware,
   adminMiddleware,
@@ -233,4 +239,22 @@ routes.delete(
   authMiddleware,
   adminMiddleware,
   adminProductController.deleteProductImage
+);
+routes.post(
+  '/admin/products/:id/variants',
+  authMiddleware,
+  adminMiddleware,
+  adminProductController.addProductVariant
+);
+routes.put(
+  '/admin/products/variants/:variantId',
+  authMiddleware,
+  adminMiddleware,
+  adminProductController.updateProductVariant
+);
+routes.delete(
+  '/admin/products/variants/:variantId',
+  authMiddleware,
+  adminMiddleware,
+  adminProductController.deleteProductVariant
 );

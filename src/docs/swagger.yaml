@@ -3270,6 +3270,374 @@ paths:
                 '403':
                     description: Forbidden - user is not an admin
 
+    /admin/products/{id}/variants:
+        post:
+            summary: Add variant to product (Admin)
+            description: Adds a new size variant with stock to a product. Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+                  description: Product ID
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - size
+                                - stock
+                            properties:
+                                size:
+                                    type: string
+                                    description: Size (e.g., P, M, G, GG, XL)
+                                    example: M
+                                stock:
+                                    type: integer
+                                    minimum: 0
+                                    description: Stock quantity
+                                    example: 50
+            responses:
+                '201':
+                    description: Variant added successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    variant:
+                                        type: object
+                                        properties:
+                                            id:
+                                                type: integer
+                                                example: 1
+                                            productId:
+                                                type: integer
+                                                example: 1
+                                            size:
+                                                type: string
+                                                example: M
+                                            stock:
+                                                type: integer
+                                                example: 50
+                                            createdAt:
+                                                type: string
+                                                format: date-time
+                                            updatedAt:
+                                                type: string
+                                                format: date-time
+                '400':
+                    description: Invalid data or variant already exists
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Variant with this size already exists
+                '404':
+                    description: Product not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Product not found
+                '401':
+                    description: Unauthorized - missing or invalid token
+                '403':
+                    description: Forbidden - user is not an admin
+
+    /admin/products/variants/{variantId}:
+        put:
+            summary: Update variant stock (Admin)
+            description: Updates the stock quantity of a product variant. Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: variantId
+                  required: true
+                  schema:
+                      type: integer
+                  description: Variant ID
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - stock
+                            properties:
+                                stock:
+                                    type: integer
+                                    minimum: 0
+                                    description: New stock quantity
+                                    example: 75
+            responses:
+                '200':
+                    description: Variant updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    variant:
+                                        type: object
+                                        properties:
+                                            id:
+                                                type: integer
+                                                example: 1
+                                            productId:
+                                                type: integer
+                                                example: 1
+                                            size:
+                                                type: string
+                                                example: M
+                                            stock:
+                                                type: integer
+                                                example: 75
+                                            createdAt:
+                                                type: string
+                                                format: date-time
+                                            updatedAt:
+                                                type: string
+                                                format: date-time
+                '400':
+                    description: Invalid variant data
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Invalid variant data
+                '404':
+                    description: Variant not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Variant not found
+                '401':
+                    description: Unauthorized - missing or invalid token
+                '403':
+                    description: Forbidden - user is not an admin
+        delete:
+            summary: Delete product variant (Admin)
+            description: Removes a variant from a product. Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: variantId
+                  required: true
+                  schema:
+                      type: integer
+                  description: Variant ID
+            responses:
+                '200':
+                    description: Variant deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    message:
+                                        type: string
+                                        example: Variant deleted successfully
+                '400':
+                    description: Invalid variant ID
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Invalid variant ID
+                '404':
+                    description: Variant not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Variant not found
+                '401':
+                    description: Unauthorized - missing or invalid token
+                '403':
+                    description: Forbidden - user is not an admin
+
+    /admin/products/stats:
+        get:
+            summary: Get product statistics (Admin)
+            description: Returns general product statistics including top selling, most viewed, most favorited, and out of stock products. Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            responses:
+                '200':
+                    description: Product statistics
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    stats:
+                                        type: object
+                                        properties:
+                                            totalProducts:
+                                                type: integer
+                                                description: Total number of products
+                                                example: 145
+                                            topSelling:
+                                                type: array
+                                                description: Top 10 best selling products
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        id:
+                                                            type: integer
+                                                            example: 1
+                                                        label:
+                                                            type: string
+                                                            example: Camiseta React
+                                                        labelEn:
+                                                            type: string
+                                                            nullable: true
+                                                            example: React T-Shirt
+                                                        salesCount:
+                                                            type: integer
+                                                            example: 250
+                                                        price:
+                                                            type: number
+                                                            example: 94.5
+                                                        image:
+                                                            type: string
+                                                            nullable: true
+                                                            example: http://localhost:3333/media/products/camiseta-react-azul.png
+                                            mostViewed:
+                                                type: array
+                                                description: Top 10 most viewed products
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        id:
+                                                            type: integer
+                                                            example: 2
+                                                        label:
+                                                            type: string
+                                                            example: Camiseta Node
+                                                        labelEn:
+                                                            type: string
+                                                            nullable: true
+                                                            example: Node T-Shirt
+                                                        viewsCount:
+                                                            type: integer
+                                                            example: 1250
+                                                        price:
+                                                            type: number
+                                                            example: 89.9
+                                                        image:
+                                                            type: string
+                                                            nullable: true
+                                                            example: http://localhost:3333/media/products/camiseta-node.png
+                                            mostFavorited:
+                                                type: array
+                                                description: Top 10 most favorited products
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        id:
+                                                            type: integer
+                                                            example: 3
+                                                        label:
+                                                            type: string
+                                                            example: Boné B7
+                                                        labelEn:
+                                                            type: string
+                                                            nullable: true
+                                                            example: B7 Cap
+                                                        price:
+                                                            type: number
+                                                            example: 49.9
+                                                        favoritesCount:
+                                                            type: integer
+                                                            example: 85
+                                                        image:
+                                                            type: string
+                                                            nullable: true
+                                                            example: http://localhost:3333/media/products/bone-b7-azul.png
+                                            outOfStock:
+                                                type: array
+                                                description: Products that are out of stock (all variants have 0 stock)
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        id:
+                                                            type: integer
+                                                            example: 10
+                                                        label:
+                                                            type: string
+                                                            example: Camiseta PHP
+                                                        labelEn:
+                                                            type: string
+                                                            nullable: true
+                                                            example: PHP T-Shirt
+                                                        price:
+                                                            type: number
+                                                            example: 84.9
+                                                        image:
+                                                            type: string
+                                                            nullable: true
+                                                            example: http://localhost:3333/media/products/camiseta-php.png
+                                                        variants:
+                                                            type: array
+                                                            items:
+                                                                type: object
+                                                                properties:
+                                                                    size:
+                                                                        type: string
+                                                                        example: M
+                                                                    stock:
+                                                                        type: integer
+                                                                        example: 0
+                '401':
+                    description: Unauthorized - missing or invalid token
+                '403':
+                    description: Forbidden - user is not an admin
+
     /admin/banners/reorder:
         put:
             summary: Reorder banners
@@ -4345,6 +4713,11 @@ components:
                             metadataValueId:
                                 type: integer
                                 example: 2
+                variants:
+                    type: array
+                    description: Product size variants with stock
+                    items:
+                        $ref: '#/components/schemas/ProductVariant'
                 viewsCount:
                     type: integer
                     description: Number of times the product was viewed
@@ -4374,6 +4747,36 @@ components:
                     format: date-time
                     description: Product last update timestamp
                     example: '2026-02-01T14:20:00.000Z'
+
+        ProductVariant:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    description: Variant unique identifier
+                    example: 1
+                productId:
+                    type: integer
+                    description: Product ID
+                    example: 1
+                size:
+                    type: string
+                    description: Size variant (e.g., P, M, G, GG, XL)
+                    example: M
+                stock:
+                    type: integer
+                    description: Stock quantity for this size
+                    example: 50
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: Variant creation timestamp
+                    example: '2026-02-02T10:30:00.000Z'
+                updatedAt:
+                    type: string
+                    format: date-time
+                    description: Variant last update timestamp
+                    example: '2026-02-02T14:20:00.000Z'
 
         Pagination:
             type: object

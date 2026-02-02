@@ -38,3 +38,16 @@ export const addProductImageSchema = z.object({
 export const deleteProductImageSchema = z.object({
   imageId: z.string(),
 });
+
+export const addProductVariantSchema = z.object({
+  size: z.string().min(1, 'Size is required'),
+  stock: z.number().int().min(0, 'Stock must be non-negative'),
+});
+
+export const updateProductVariantSchema = z.object({
+  stock: z.number().int().min(0, 'Stock must be non-negative'),
+});
+
+export const deleteProductVariantSchema = z.object({
+  variantId: z.string(),
+});

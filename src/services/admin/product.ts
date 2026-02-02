@@ -141,6 +141,16 @@ export const getProductById = async (id: number) => {
           id: 'asc',
         },
       },
+      variants: {
+        select: {
+          id: true,
+          size: true,
+          stock: true,
+        },
+        orderBy: {
+          size: 'asc',
+        },
+      },
       metadata: {
         select: {
           id: true,
@@ -242,4 +252,127 @@ export const deleteProductImage = async (imageId: number) => {
   await prisma.productImage.delete({
     where: { id: imageId },
   });
+};
+
+export const addProductVariant = async (productId: number, size: string, stock: number) => {
+  const variant = await prisma.productVariant.create({
+    data: {
+      productId,
+      size,
+      stock,
+    },
+  });
+
+  return variant;
+};
+
+export const updateProductVariant = async (variantId: number, stock: number) => {
+  const variant = await prisma.productVariant.update({
+    where: { id: variantId },
+    data: { stock },
+  });
+
+  return variant;
+};
+
+export const deleteProductVariant = async (variantId: number) => {
+  await prisma.productVariant.delete({
+    where: { id: variantId },
+  });
+};
+
+export const getProductStats = async () => {
+  const [totalProducts, topSelling, mostViewed, mostFavorited, outOfStock] = await Promise.all([
+    prisma.product.count(),
+    prisma.product.findMany({
+      select: {
+        id: true,
+        label: true,
+        labelEn: true,
+        salesCount: true,
+        price: true,
+        images: {
+          take: 1,
+          orderBy: { id: 'asc' },
+        },
+      },
+      orderBy: {
+        salesCount: 'desc',
+      },
+      take: 10,
+    }),
+    prisma.product.findMany({
+      select: {
+        id: true,
+        label: true,
+        labelEn: true,
+        viewsCount: true,
+        price: true,
+        images: {
+          take: 1,
+          orderBy: { id: 'asc' },
+        },
+      },
+      orderBy: {
+        viewsCount: 'desc',
+      },
+      take: 10,
+    }),
+    prisma.product.findMany({
+      select: {
+        id: true,
+        label: true,
+        labelEn: true,
+        price: true,
+        images: {
+          take: 1,
+          orderBy: { id: 'asc' },
+        },
+        _count: {
+          select: {
+            favorites: true,
+          },
+        },
+      },
+      orderBy: {
+        favorites: {
+          _count: 'desc',
+        },
+      },
+      take: 10,
+    }),
+    prisma.product.findMany({
+      where: {
+        variants: {
+          every: {
+            stock: 0,
+          },
+        },
+      },
+      select: {
+        id: true,
+        label: true,
+        labelEn: true,
+        price: true,
+        images: {
+          take: 1,
+          orderBy: { id: 'asc' },
+        },
+        variants: {
+          select: {
+            size: true,
+            stock: true,
+          },
+        },
+      },
+    }),
+  ]);
+
+  return {
+    totalProducts,
+    topSelling,
+    mostViewed,
+    mostFavorited,
+    outOfStock,
+  };
 };

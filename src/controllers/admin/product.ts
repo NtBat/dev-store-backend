@@ -7,6 +7,9 @@ import {
   updateProductSchema,
   addProductImageSchema,
   deleteProductImageSchema,
+  addProductVariantSchema,
+  updateProductVariantSchema,
+  deleteProductVariantSchema,
 } from '../../schemas/admin/product-schema';
 import { getAbsoluteImageUrl } from '../../utils/get-absolute-image-url';
 
@@ -208,5 +211,145 @@ export const deleteProductImage = async (req: Request, res: Response) => {
     }
 
     res.status(500).json({ error: 'Failed to delete image' });
+  }
+};
+
+export const addProductVariant = async (req: Request, res: Response) => {
+  try {
+    const paramsResult = getProductByIdSchema.safeParse(req.params);
+
+    if (!paramsResult.success) {
+      return res.status(400).json({ error: 'Invalid product ID' });
+    }
+
+    const bodyResult = addProductVariantSchema.safeParse(req.body);
+
+    if (!bodyResult.success) {
+      return res
+        .status(400)
+        .json({ error: 'Invalid variant data', details: bodyResult.error.issues });
+    }
+
+    const { id } = paramsResult.data;
+    const { size, stock } = bodyResult.data;
+
+    const variant = await productService.addProductVariant(parseInt(id), size, stock);
+
+    res.status(201).json({ error: null, variant });
+  } catch (error: any) {
+    console.error('Error adding product variant:', error);
+
+    if (error.code === 'P2003') {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    if (error.code === 'P2002') {
+      return res.status(400).json({ error: 'Variant with this size already exists' });
+    }
+
+    res.status(500).json({ error: 'Failed to add product variant' });
+  }
+};
+
+export const updateProductVariant = async (req: Request, res: Response) => {
+  try {
+    const paramsResult = deleteProductVariantSchema.safeParse(req.params);
+
+    if (!paramsResult.success) {
+      return res.status(400).json({ error: 'Invalid variant ID' });
+    }
+
+    const bodyResult = updateProductVariantSchema.safeParse(req.body);
+
+    if (!bodyResult.success) {
+      return res
+        .status(400)
+        .json({ error: 'Invalid variant data', details: bodyResult.error.issues });
+    }
+
+    const { variantId } = paramsResult.data;
+    const { stock } = bodyResult.data;
+
+    const variant = await productService.updateProductVariant(parseInt(variantId), stock);
+
+    res.json({ error: null, variant });
+  } catch (error: any) {
+    console.error('Error updating product variant:', error);
+
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Variant not found' });
+    }
+
+    res.status(500).json({ error: 'Failed to update variant' });
+  }
+};
+
+export const deleteProductVariant = async (req: Request, res: Response) => {
+  try {
+    const parseResult = deleteProductVariantSchema.safeParse(req.params);
+
+    if (!parseResult.success) {
+      return res.status(400).json({ error: 'Invalid variant ID' });
+    }
+
+    const { variantId } = parseResult.data;
+
+    await productService.deleteProductVariant(parseInt(variantId));
+
+    res.json({ error: null, message: 'Variant deleted successfully' });
+  } catch (error: any) {
+    console.error('Error deleting product variant:', error);
+
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Variant not found' });
+    }
+
+    res.status(500).json({ error: 'Failed to delete variant' });
+  }
+};
+
+export const getProductStats = async (req: Request, res: Response) => {
+  try {
+    const stats = await productService.getProductStats();
+
+    const topSellingWithImages = stats.topSelling.map((p) => ({
+      ...p,
+      image: p.images[0] ? getAbsoluteImageUrl(`media/products/${p.images[0].url}`) : null,
+      images: undefined,
+    }));
+
+    const mostViewedWithImages = stats.mostViewed.map((p) => ({
+      ...p,
+      image: p.images[0] ? getAbsoluteImageUrl(`media/products/${p.images[0].url}`) : null,
+      images: undefined,
+    }));
+
+    const mostFavoritedWithImages = stats.mostFavorited.map((p) => ({
+      ...p,
+      image: p.images[0] ? getAbsoluteImageUrl(`media/products/${p.images[0].url}`) : null,
+      images: undefined,
+      favoritesCount: p._count.favorites,
+      _count: undefined,
+    }));
+
+    const outOfStockWithImages = stats.outOfStock.map((p) => ({
+      ...p,
+      image: p.images[0] ? getAbsoluteImageUrl(`media/products/${p.images[0].url}`) : null,
+      images: undefined,
+    }));
+
+    res.json({
+      error: null,
+      stats: {
+        totalProducts: stats.totalProducts,
+        topSelling: topSellingWithImages,
+        mostViewed: mostViewedWithImages,
+        mostFavorited: mostFavoritedWithImages,
+        outOfStock: outOfStockWithImages,
+      },
+    });
+  } catch (error) {
+    console.error('Error getting product stats:', error);
+    res.status(500).json({ error: 'Failed to get product stats' });
   }
 };
