@@ -10,6 +10,7 @@ import * as webhookController from '../controllers/webhook';
 import * as orderController from '../controllers/order';
 import * as storeController from '../controllers/store';
 import * as favoriteController from '../controllers/favorite';
+import * as adminUserController from '../controllers/admin/user';
 export const routes = Router();
 
 routes.get('/ping', (_, res: Response) => {
@@ -141,3 +142,21 @@ routes.get(
   adminMiddleware,
   favoriteController.getAllFavoritesGrouped
 );
+
+// Users routes - Admin only
+routes.get('/admin/users', authMiddleware, adminMiddleware, adminUserController.getAllUsers);
+routes.get(
+  '/admin/users/stats',
+  authMiddleware,
+  adminMiddleware,
+  adminUserController.getUsersStats
+);
+routes.get('/admin/users/:id', authMiddleware, adminMiddleware, adminUserController.getUserById);
+routes.put('/admin/users/:id', authMiddleware, adminMiddleware, adminUserController.updateUser);
+routes.put(
+  '/admin/users/:id/role',
+  authMiddleware,
+  adminMiddleware,
+  adminUserController.updateUserRole
+);
+routes.delete('/admin/users/:id', authMiddleware, adminMiddleware, adminUserController.deleteUser);
