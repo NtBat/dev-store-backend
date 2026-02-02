@@ -14,17 +14,18 @@ datasource db {
 }
 
 model User {
-  id        Int           @id @default(autoincrement())
+  id        Int             @id @default(autoincrement())
   name      String
-  email     String        @unique
+  email     String          @unique
   password  String
   token     String?
-  role      String        @default("customer")
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @default(now()) @updatedAt
+  role      String          @default("customer")
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @default(now()) @updatedAt
   addresses UserAddress[]
   orders    Order[]
   favorites Favorite[]
+  ratings   ProductRating[]
 }
 
 model UserAddress {
@@ -69,6 +70,7 @@ model Product {
   category      Category?         @relation(fields: [categoryId], references: [id])
   orders        OrderProduct[]
   favorites     Favorite[]
+  ratings       ProductRating[]
 }
 
 model ProductVariant {
@@ -213,4 +215,19 @@ model Favorite {
   product   Product  @relation(fields: [productId], references: [id])
 
   @@unique([userId, productId])
+}
+
+model ProductRating {
+  id        Int      @id @default(autoincrement())
+  productId Int
+  userId    Int
+  rating    Int
+  comment   String?
+  approved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([productId, userId])
 }

@@ -228,6 +228,147 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Error'
 
+    /products/{id}/ratings:
+        post:
+            summary: Create product rating
+            description: Allows an authenticated user to rate a product with a rating from 1 to 5 and an optional comment. Each user can only rate a product once. Ratings require admin approval before being visible.
+            tags:
+                - Ratings
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+                  description: Product ID
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - rating
+                            properties:
+                                rating:
+                                    type: integer
+                                    minimum: 1
+                                    maximum: 5
+                                    description: Rating value from 1 to 5
+                                    example: 5
+                                comment:
+                                    type: string
+                                    description: Optional comment about the product
+                                    example: Great product, highly recommended!
+            responses:
+                '201':
+                    description: Rating created successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    rating:
+                                        $ref: '#/components/schemas/ProductRating'
+                                    message:
+                                        type: string
+                                        example: Rating submitted successfully. It will be visible after admin approval.
+                '400':
+                    description: Invalid input or user already rated this product
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: You have already rated this product
+                '401':
+                    description: Unauthorized - missing or invalid token
+                '404':
+                    description: Product not found
+        get:
+            summary: Get product ratings
+            description: Returns a paginated list of approved ratings for a specific product, including user information and comments.
+            tags:
+                - Ratings
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+                  description: Product ID
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      default: 1
+                  description: Page number for pagination
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      default: 10
+                  description: Number of ratings per page
+            responses:
+                '200':
+                    description: List of approved ratings
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    ratings:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/PublicProductRating'
+                                    pagination:
+                                        $ref: '#/components/schemas/Pagination'
+                '400':
+                    description: Invalid query parameters
+
+    /products/{id}/ratings/average:
+        get:
+            summary: Get product rating average
+            description: Returns the average rating and total count of approved ratings for a specific product.
+            tags:
+                - Ratings
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+                  description: Product ID
+            responses:
+                '200':
+                    description: Rating average and count
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    average:
+                                        type: number
+                                        format: float
+                                        description: Average rating (rounded to 1 decimal place)
+                                        example: 4.5
+                                    count:
+                                        type: integer
+                                        description: Total number of approved ratings
+                                        example: 23
+                '400':
+                    description: Invalid product ID
+
     /category/{slug}/metadata:
         get:
             summary: Get category with metadata
@@ -4090,6 +4231,203 @@ paths:
                 '403':
                     description: Forbidden - user is not an admin
 
+    /admin/ratings:
+        get:
+            summary: List all ratings (Admin)
+            description: Returns a paginated list of all product ratings with filters. Requires admin authentication.
+            tags:
+                - Admin Ratings
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                      default: 1
+                  description: Page number for pagination
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      default: 20
+                  description: Number of ratings per page
+                - in: query
+                  name: status
+                  schema:
+                      type: string
+                      enum: [pending, approved, rejected]
+                  description: Filter by rating status
+                - in: query
+                  name: productId
+                  schema:
+                      type: integer
+                  description: Filter by product ID
+                - in: query
+                  name: userId
+                  schema:
+                      type: integer
+                  description: Filter by user ID
+                - in: query
+                  name: minRating
+                  schema:
+                      type: integer
+                      minimum: 1
+                      maximum: 5
+                  description: Minimum rating value
+                - in: query
+                  name: maxRating
+                  schema:
+                      type: integer
+                      minimum: 1
+                      maximum: 5
+                  description: Maximum rating value
+            responses:
+                '200':
+                    description: List of ratings with pagination
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    ratings:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/AdminProductRating'
+                                    pagination:
+                                        $ref: '#/components/schemas/Pagination'
+                '400':
+                    description: Invalid query parameters
+                '401':
+                    description: Unauthorized - missing or invalid token
+                '403':
+                    description: Forbidden - user is not an admin
+
+    /admin/ratings/{id}:
+        get:
+            summary: Get rating by ID (Admin)
+            description: Returns detailed information about a specific rating. Requires admin authentication.
+            tags:
+                - Admin Ratings
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+                  description: Rating ID
+            responses:
+                '200':
+                    description: Rating details
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    rating:
+                                        $ref: '#/components/schemas/AdminProductRating'
+                '400':
+                    description: Invalid rating ID
+                '404':
+                    description: Rating not found
+                '401':
+                    description: Unauthorized - missing or invalid token
+                '403':
+                    description: Forbidden - user is not an admin
+        delete:
+            summary: Delete rating (Admin)
+            description: Deletes a product rating permanently. Requires admin authentication.
+            tags:
+                - Admin Ratings
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+                  description: Rating ID
+            responses:
+                '200':
+                    description: Rating deleted successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    message:
+                                        type: string
+                                        example: Rating deleted successfully
+                '400':
+                    description: Invalid rating ID
+                '404':
+                    description: Rating not found
+                '401':
+                    description: Unauthorized - missing or invalid token
+                '403':
+                    description: Forbidden - user is not an admin
+
+    /admin/ratings/{id}/status:
+        put:
+            summary: Update rating status (Admin)
+            description: Approves or rejects a product rating. Requires admin authentication.
+            tags:
+                - Admin Ratings
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+                  description: Rating ID
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - approved
+                            properties:
+                                approved:
+                                    type: boolean
+                                    description: Set to true to approve, false to reject
+                                    example: true
+            responses:
+                '200':
+                    description: Rating status updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    rating:
+                                        $ref: '#/components/schemas/ProductRating'
+                                    message:
+                                        type: string
+                                        example: Rating approved successfully
+                '400':
+                    description: Invalid rating ID or request body
+                '404':
+                    description: Rating not found
+                '401':
+                    description: Unauthorized - missing or invalid token
+                '403':
+                    description: Forbidden - user is not an admin
+
     /admin/banners/reorder:
         put:
             summary: Reorder banners
@@ -5933,6 +6271,125 @@ components:
                 type: string
                 nullable: true
                 example: http://localhost:3333/media/products/camiseta-react-azul.png
+
+    ProductRating:
+        type: object
+        properties:
+            id:
+                type: integer
+                example: 1
+            productId:
+                type: integer
+                example: 5
+            userId:
+                type: integer
+                example: 12
+            rating:
+                type: integer
+                minimum: 1
+                maximum: 5
+                example: 5
+            comment:
+                type: string
+                nullable: true
+                example: Great product, highly recommended!
+            approved:
+                type: boolean
+                example: false
+            createdAt:
+                type: string
+                format: date-time
+                example: '2026-02-02T10:30:00.000Z'
+            updatedAt:
+                type: string
+                format: date-time
+                example: '2026-02-02T10:30:00.000Z'
+
+    PublicProductRating:
+        type: object
+        properties:
+            id:
+                type: integer
+                example: 1
+            rating:
+                type: integer
+                minimum: 1
+                maximum: 5
+                example: 5
+            comment:
+                type: string
+                nullable: true
+                example: Great product, highly recommended!
+            createdAt:
+                type: string
+                format: date-time
+                example: '2026-02-02T10:30:00.000Z'
+            user:
+                type: object
+                properties:
+                    id:
+                        type: integer
+                        example: 12
+                    name:
+                        type: string
+                        example: João Silva
+
+    AdminProductRating:
+        type: object
+        properties:
+            id:
+                type: integer
+                example: 1
+            rating:
+                type: integer
+                minimum: 1
+                maximum: 5
+                example: 5
+            comment:
+                type: string
+                nullable: true
+                example: Great product, highly recommended!
+            approved:
+                type: boolean
+                example: false
+            createdAt:
+                type: string
+                format: date-time
+                example: '2026-02-02T10:30:00.000Z'
+            updatedAt:
+                type: string
+                format: date-time
+                example: '2026-02-02T10:30:00.000Z'
+            user:
+                type: object
+                properties:
+                    id:
+                        type: integer
+                        example: 12
+                    name:
+                        type: string
+                        example: João Silva
+                    email:
+                        type: string
+                        format: email
+                        example: joao@example.com
+            product:
+                type: object
+                properties:
+                    id:
+                        type: integer
+                        example: 5
+                    label:
+                        type: string
+                        example: Camiseta React
+                    labelEn:
+                        type: string
+                        nullable: true
+                        example: React T-Shirt
+                    image:
+                        type: string
+                        nullable: true
+                        example: http://localhost:3333/media/products/camiseta-react-azul.png
 
     securitySchemes:
         BearerAuth:

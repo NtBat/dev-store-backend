@@ -10,11 +10,13 @@ import * as webhookController from '../controllers/webhook';
 import * as orderController from '../controllers/order';
 import * as storeController from '../controllers/store';
 import * as favoriteController from '../controllers/favorite';
+import * as ratingController from '../controllers/rating';
 import * as adminUserController from '../controllers/admin/user';
 import * as adminBannerController from '../controllers/admin/banner';
 import * as adminProductController from '../controllers/admin/product';
 import * as adminOrderController from '../controllers/admin/order';
 import * as adminDashboardController from '../controllers/admin/dashboard';
+import * as adminRatingController from '../controllers/admin/rating';
 export const routes = Router();
 
 routes.get('/ping', (_, res: Response) => {
@@ -26,6 +28,10 @@ routes.get('/banners', bannerController.getBanners);
 routes.get('/products', optionalAuthMiddleware, productController.getProducts);
 routes.get('/products/:id', optionalAuthMiddleware, productController.getProductById);
 routes.get('/products/:id/related', optionalAuthMiddleware, productController.getProductRelated);
+
+routes.post('/products/:id/ratings', authMiddleware, ratingController.createRating);
+routes.get('/products/:id/ratings', ratingController.getProductRatings);
+routes.get('/products/:id/ratings/average', ratingController.getProductRatingAverage);
 
 routes.get('/category/:slug/metadata', categoryController.getCategoryWithMetadata);
 
@@ -301,4 +307,24 @@ routes.get(
   authMiddleware,
   adminMiddleware,
   adminDashboardController.getTopProducts
+);
+
+routes.get('/admin/ratings', authMiddleware, adminMiddleware, adminRatingController.getAllRatings);
+routes.get(
+  '/admin/ratings/:id',
+  authMiddleware,
+  adminMiddleware,
+  adminRatingController.getRatingById
+);
+routes.put(
+  '/admin/ratings/:id/status',
+  authMiddleware,
+  adminMiddleware,
+  adminRatingController.updateRatingStatus
+);
+routes.delete(
+  '/admin/ratings/:id',
+  authMiddleware,
+  adminMiddleware,
+  adminRatingController.deleteRating
 );

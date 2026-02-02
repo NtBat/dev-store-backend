@@ -1,0 +1,346 @@
+{
+    "info": {
+        "name": "DevStore - Ratings",
+        "_postman_id": "ratings-collection",
+        "description": "Product ratings API endpoints",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{auth_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "item": [
+        {
+            "name": "Public Ratings",
+            "item": [
+                {
+                    "name": "Create rating",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Great product, highly recommended!\"\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/products/{{product_id}}/ratings",
+                            "host": ["{{base_url}}"],
+                            "path": ["products", "{{product_id}}", "ratings"]
+                        },
+                        "description": "Create a new rating for a product (requires authentication)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get product ratings",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/products/{{product_id}}/ratings?page=1&limit=10",
+                            "host": ["{{base_url}}"],
+                            "path": ["products", "{{product_id}}", "ratings"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "10"
+                                }
+                            ]
+                        },
+                        "description": "Get all approved ratings for a product"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get rating average",
+                    "request": {
+                        "auth": {
+                            "type": "noauth"
+                        },
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/products/{{product_id}}/ratings/average",
+                            "host": ["{{base_url}}"],
+                            "path": ["products", "{{product_id}}", "ratings", "average"]
+                        },
+                        "description": "Get average rating and count for a product"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Admin Ratings",
+            "item": [
+                {
+                    "name": "List all ratings",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/admin/ratings?page=1&limit=20",
+                            "host": ["{{base_url}}"],
+                            "path": ["admin", "ratings"],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "description": "Get all ratings with filters (requires admin)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List pending ratings",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/admin/ratings?status=pending&page=1&limit=20",
+                            "host": ["{{base_url}}"],
+                            "path": ["admin", "ratings"],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "pending"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "description": "Get all pending ratings (requires admin)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "List approved ratings",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/admin/ratings?status=approved&page=1&limit=20",
+                            "host": ["{{base_url}}"],
+                            "path": ["admin", "ratings"],
+                            "query": [
+                                {
+                                    "key": "status",
+                                    "value": "approved"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "description": "Get all approved ratings (requires admin)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by product",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/admin/ratings?productId={{product_id}}&page=1&limit=20",
+                            "host": ["{{base_url}}"],
+                            "path": ["admin", "ratings"],
+                            "query": [
+                                {
+                                    "key": "productId",
+                                    "value": "{{product_id}}"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "description": "Get all ratings for a specific product (requires admin)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Filter by rating range",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/admin/ratings?minRating=4&maxRating=5&page=1&limit=20",
+                            "host": ["{{base_url}}"],
+                            "path": ["admin", "ratings"],
+                            "query": [
+                                {
+                                    "key": "minRating",
+                                    "value": "4"
+                                },
+                                {
+                                    "key": "maxRating",
+                                    "value": "5"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "description": "Get ratings within a rating range (requires admin)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get rating by ID",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/admin/ratings/{{rating_id}}",
+                            "host": ["{{base_url}}"],
+                            "path": ["admin", "ratings", "{{rating_id}}"]
+                        },
+                        "description": "Get detailed information about a specific rating (requires admin)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Approve rating",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"approved\": true\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/admin/ratings/{{rating_id}}/status",
+                            "host": ["{{base_url}}"],
+                            "path": ["admin", "ratings", "{{rating_id}}", "status"]
+                        },
+                        "description": "Approve a rating (requires admin)"
+                    },
+                    "response": [],
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    console.log('Rating approved successfully');",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Reject rating",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"approved\": false\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/admin/ratings/{{rating_id}}/status",
+                            "host": ["{{base_url}}"],
+                            "path": ["admin", "ratings", "{{rating_id}}", "status"]
+                        },
+                        "description": "Reject a rating (requires admin)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete rating",
+                    "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                            "raw": "{{base_url}}/admin/ratings/{{rating_id}}",
+                            "host": ["{{base_url}}"],
+                            "path": ["admin", "ratings", "{{rating_id}}"]
+                        },
+                        "description": "Delete a rating permanently (requires admin)"
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3333",
+            "type": "string"
+        },
+        {
+            "key": "auth_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "product_id",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "rating_id",
+            "value": "",
+            "type": "string"
+        }
+    ]
+}
