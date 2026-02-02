@@ -33,6 +33,19 @@
     ],
     "item": [
         {
+            "name": "Get order statistics",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/orders/stats",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "orders", "stats"]
+                }
+            },
+            "response": []
+        },
+        {
             "name": "List all orders",
             "request": {
                 "method": "GET",
@@ -195,6 +208,28 @@
                             "value": "500"
                         }
                     ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Update order status",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"status\": \"shipped\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/admin/orders/{{order_id}}/status",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "orders", "{{order_id}}", "status"]
                 }
             },
             "response": []

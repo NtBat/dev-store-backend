@@ -158,3 +158,95 @@ export const getOrderById = async (id: number) => {
 
   return order;
 };
+
+export const updateOrderStatus = async (id: number, status: string) => {
+  const order = await prisma.order.update({
+    where: { id },
+    data: { status },
+  });
+
+  await prisma.orderStatusHistory.create({
+    data: {
+      orderId: id,
+      status,
+    },
+  });
+
+  return order;
+};
+
+export const getOrdersStats = async () => {
+  const now = new Date();
+  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const lastDayOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+
+  const [totalOrders, ordersByStatus, totalRevenue, monthlyRevenue, averageTicket] =
+    await Promise.all([
+      prisma.order.count(),
+      prisma.order.groupBy({
+        by: ['status'],
+        _count: {
+          id: true,
+        },
+      }),
+      prisma.order.aggregate({
+        where: {
+          status: {
+            in: ['paid', 'shipped', 'delivered'],
+          },
+        },
+        _sum: {
+          total: true,
+        },
+      }),
+      prisma.order.aggregate({
+        where: {
+          status: {
+            in: ['paid', 'shipped', 'delivered'],
+          },
+          createdAt: {
+            gte: firstDayOfMonth,
+            lte: lastDayOfMonth,
+          },
+        },
+        _sum: {
+          total: true,
+        },
+        _count: {
+          id: true,
+        },
+      }),
+      prisma.order.aggregate({
+        where: {
+          status: {
+            in: ['paid', 'shipped', 'delivered'],
+          },
+        },
+        _avg: {
+          total: true,
+        },
+      }),
+    ]);
+
+  const statusMap = ordersByStatus.reduce(
+    (acc, item) => {
+      acc[item.status] = item._count.id;
+      return acc;
+    },
+    {} as Record<string, number>
+  );
+
+  return {
+    totalOrders,
+    ordersByStatus: {
+      pending: statusMap.pending || 0,
+      paid: statusMap.paid || 0,
+      cancelled: statusMap.cancelled || 0,
+      shipped: statusMap.shipped || 0,
+      delivered: statusMap.delivered || 0,
+    },
+    totalRevenue: totalRevenue._sum.total || 0,
+    monthlyRevenue: monthlyRevenue._sum.total || 0,
+    averageTicket: averageTicket._avg.total || 0,
+  };
+};

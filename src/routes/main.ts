@@ -261,5 +261,17 @@ routes.delete(
 );
 
 // Orders routes - Admin only
+routes.get(
+  '/admin/orders/stats',
+  authMiddleware,
+  adminMiddleware,
+  adminOrderController.getOrdersStats
+);
 routes.get('/admin/orders', authMiddleware, adminMiddleware, adminOrderController.getAllOrders);
 routes.get('/admin/orders/:id', authMiddleware, adminMiddleware, adminOrderController.getOrderById);
+routes.put(
+  '/admin/orders/:id/status',
+  authMiddleware,
+  adminMiddleware,
+  adminOrderController.updateOrderStatus
+);

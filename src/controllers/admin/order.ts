@@ -1,6 +1,10 @@
 import { Request, Response } from 'express';
 import * as orderService from '../../services/admin/order';
-import { getOrderByIdSchema, getOrdersQuerySchema } from '../../schemas/admin/order-schema';
+import {
+  getOrderByIdSchema,
+  getOrdersQuerySchema,
+  updateOrderStatusSchema,
+} from '../../schemas/admin/order-schema';
 import { getAbsoluteImageUrl } from '../../utils/get-absolute-image-url';
 
 export const getAllOrders = async (req: Request, res: Response) => {
@@ -70,5 +74,47 @@ export const getOrderById = async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error getting order by ID:', error);
     res.status(500).json({ error: 'Failed to get order by ID' });
+  }
+};
+
+export const updateOrderStatus = async (req: Request, res: Response) => {
+  try {
+    const paramsResult = getOrderByIdSchema.safeParse(req.params);
+
+    if (!paramsResult.success) {
+      return res.status(400).json({ error: 'Invalid order ID' });
+    }
+
+    const bodyResult = updateOrderStatusSchema.safeParse(req.body);
+
+    if (!bodyResult.success) {
+      return res.status(400).json({ error: 'Invalid status', details: bodyResult.error.issues });
+    }
+
+    const { id } = paramsResult.data;
+    const { status } = bodyResult.data;
+
+    const order = await orderService.updateOrderStatus(parseInt(id), status);
+
+    res.json({ error: null, order });
+  } catch (error: any) {
+    console.error('Error updating order status:', error);
+
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    res.status(500).json({ error: 'Failed to update order status' });
+  }
+};
+
+export const getOrdersStats = async (req: Request, res: Response) => {
+  try {
+    const stats = await orderService.getOrdersStats();
+
+    res.json({ error: null, stats });
+  } catch (error) {
+    console.error('Error getting orders stats:', error);
+    res.status(500).json({ error: 'Failed to get orders stats' });
   }
 };

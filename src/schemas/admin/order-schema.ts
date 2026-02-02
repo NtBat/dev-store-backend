@@ -14,3 +14,7 @@ export const getOrdersQuerySchema = z.object({
 export const getOrderByIdSchema = z.object({
   id: z.string(),
 });
+
+export const updateOrderStatusSchema = z.object({
+  status: z.enum(['pending', 'paid', 'cancelled', 'shipped', 'delivered']),
+});
