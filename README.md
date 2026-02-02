@@ -767,18 +767,21 @@ The webhook endpoint verifies the Stripe signature to ensure requests are legiti
 - [x] Implement wishlist post
 - [x] Implement wishlist get
 - [x] Implement wishlist delete
+- [x] Implement translations
+
+- [ ] Implement price with card
 
 - [ ] Implement shipping cost logic
 - [ ] Implement shipping days logic
+
 - [ ] Implement buy together post
 - [ ] Implement buy together get
 - [ ] Implement buy together delete
 - [ ] Implement buy together delete all
+
 - [ ] Implement order bump post
 - [ ] Implement order bump get
 - [ ] Implement order bump delete
 - [ ] Implement order bump delete all
-- [ ] Implement price with card
-- [ ] Implement translations
-- [ ] Implement price with other currencies
+
 - [ ] Implement rating system

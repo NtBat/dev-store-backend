@@ -14,6 +14,7 @@ import * as adminUserController from '../controllers/admin/user';
 import * as adminBannerController from '../controllers/admin/banner';
 import * as adminProductController from '../controllers/admin/product';
 import * as adminOrderController from '../controllers/admin/order';
+import * as adminDashboardController from '../controllers/admin/dashboard';
 export const routes = Router();
 
 routes.get('/ping', (_, res: Response) => {
@@ -274,4 +275,30 @@ routes.put(
   authMiddleware,
   adminMiddleware,
   adminOrderController.updateOrderStatus
+);
+
+// Dashboard routes - Admin only
+routes.get(
+  '/admin/dashboard',
+  authMiddleware,
+  adminMiddleware,
+  adminDashboardController.getDashboardMetrics
+);
+routes.get(
+  '/admin/dashboard/revenue-chart',
+  authMiddleware,
+  adminMiddleware,
+  adminDashboardController.getRevenueChart
+);
+routes.get(
+  '/admin/dashboard/orders-chart',
+  authMiddleware,
+  adminMiddleware,
+  adminDashboardController.getOrdersChart
+);
+routes.get(
+  '/admin/dashboard/top-products',
+  authMiddleware,
+  adminMiddleware,
+  adminDashboardController.getTopProducts
 );

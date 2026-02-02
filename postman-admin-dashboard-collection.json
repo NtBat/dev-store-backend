@@ -1,0 +1,227 @@
+{
+    "info": {
+        "name": "DevStore - Admin Dashboard",
+        "description": "Collection for testing admin dashboard routes",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{admin_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3333",
+            "type": "string"
+        },
+        {
+            "key": "admin_token",
+            "value": "your-admin-token-here",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "Get dashboard metrics",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/dashboard",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "dashboard"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get revenue chart - 7 days",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/dashboard/revenue-chart?period=7days",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "dashboard", "revenue-chart"],
+                    "query": [
+                        {
+                            "key": "period",
+                            "value": "7days"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get revenue chart - 30 days",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/dashboard/revenue-chart?period=30days",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "dashboard", "revenue-chart"],
+                    "query": [
+                        {
+                            "key": "period",
+                            "value": "30days"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get revenue chart - 12 months",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/dashboard/revenue-chart?period=12months",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "dashboard", "revenue-chart"],
+                    "query": [
+                        {
+                            "key": "period",
+                            "value": "12months"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get orders chart - 7 days",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/dashboard/orders-chart?period=7days",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "dashboard", "orders-chart"],
+                    "query": [
+                        {
+                            "key": "period",
+                            "value": "7days"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get orders chart - 30 days",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/dashboard/orders-chart?period=30days",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "dashboard", "orders-chart"],
+                    "query": [
+                        {
+                            "key": "period",
+                            "value": "30days"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get orders chart - 12 months",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/dashboard/orders-chart?period=12months",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "dashboard", "orders-chart"],
+                    "query": [
+                        {
+                            "key": "period",
+                            "value": "12months"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get top products - all time",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/dashboard/top-products?limit=10&period=all",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "dashboard", "top-products"],
+                    "query": [
+                        {
+                            "key": "limit",
+                            "value": "10"
+                        },
+                        {
+                            "key": "period",
+                            "value": "all"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get top products - last 7 days",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/dashboard/top-products?limit=10&period=7days",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "dashboard", "top-products"],
+                    "query": [
+                        {
+                            "key": "limit",
+                            "value": "10"
+                        },
+                        {
+                            "key": "period",
+                            "value": "7days"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get top products - last 30 days",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/dashboard/top-products?limit=10&period=30days",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "dashboard", "top-products"],
+                    "query": [
+                        {
+                            "key": "limit",
+                            "value": "10"
+                        },
+                        {
+                            "key": "period",
+                            "value": "30days"
+                        }
+                    ]
+                }
+            },
+            "response": []
+        }
+    ]
+}

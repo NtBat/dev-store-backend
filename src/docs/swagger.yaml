@@ -3929,6 +3929,167 @@ paths:
                 '403':
                     description: Forbidden - user is not an admin
 
+    /admin/dashboard:
+        get:
+            summary: Get dashboard metrics (Admin)
+            description: Returns general dashboard metrics including users, orders, products statistics, and recent activities. Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            responses:
+                '200':
+                    description: Dashboard metrics
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    metrics:
+                                        $ref: '#/components/schemas/DashboardMetrics'
+                '401':
+                    description: Unauthorized - missing or invalid token
+                '403':
+                    description: Forbidden - user is not an admin
+
+    /admin/dashboard/revenue-chart:
+        get:
+            summary: Get revenue chart data (Admin)
+            description: Returns revenue data for charts by period (7 days, 30 days, or 12 months). Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: query
+                  name: period
+                  schema:
+                      type: string
+                      enum: [7days, 30days, 12months]
+                      default: 30days
+                  description: Time period for chart data
+            responses:
+                '200':
+                    description: Revenue chart data
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    data:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                date:
+                                                    type: string
+                                                    description: Date in YYYY-MM-DD format (days) or YYYY-MM (months)
+                                                    example: '2026-02-01'
+                                                revenue:
+                                                    type: number
+                                                    format: float
+                                                    description: Total revenue for this date
+                                                    example: 1245.50
+                '400':
+                    description: Invalid query parameters
+                '401':
+                    description: Unauthorized - missing or invalid token
+                '403':
+                    description: Forbidden - user is not an admin
+
+    /admin/dashboard/orders-chart:
+        get:
+            summary: Get orders chart data (Admin)
+            description: Returns order count data for charts by period (7 days, 30 days, or 12 months). Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: query
+                  name: period
+                  schema:
+                      type: string
+                      enum: [7days, 30days, 12months]
+                      default: 30days
+                  description: Time period for chart data
+            responses:
+                '200':
+                    description: Orders chart data
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    data:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                date:
+                                                    type: string
+                                                    description: Date in YYYY-MM-DD format (days) or YYYY-MM (months)
+                                                    example: '2026-02-01'
+                                                orders:
+                                                    type: integer
+                                                    description: Number of orders for this date
+                                                    example: 15
+                '400':
+                    description: Invalid query parameters
+                '401':
+                    description: Unauthorized - missing or invalid token
+                '403':
+                    description: Forbidden - user is not an admin
+
+    /admin/dashboard/top-products:
+        get:
+            summary: Get top selling products (Admin)
+            description: Returns the top selling products by period with optional limit. Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: query
+                  name: limit
+                  schema:
+                      type: integer
+                      default: 10
+                  description: Number of products to return
+                - in: query
+                  name: period
+                  schema:
+                      type: string
+                      enum: [7days, 30days, all]
+                      default: all
+                  description: Time period for filtering sales
+            responses:
+                '200':
+                    description: Top selling products
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: null
+                                    products:
+                                        type: array
+                                        items:
+                                            $ref: '#/components/schemas/TopProduct'
+                '400':
+                    description: Invalid query parameters
+                '401':
+                    description: Unauthorized - missing or invalid token
+                '403':
+                    description: Forbidden - user is not an admin
+
     /admin/banners/reorder:
         put:
             summary: Reorder banners
@@ -5556,6 +5717,222 @@ components:
                 format: date-time
                 description: Banner last update timestamp
                 example: '2026-02-01T14:20:00.000Z'
+
+    DashboardMetrics:
+        type: object
+        properties:
+            users:
+                type: object
+                properties:
+                    total:
+                        type: integer
+                        description: Total number of users
+                        example: 150
+                    newThisMonth:
+                        type: integer
+                        description: Users registered this month
+                        example: 12
+                    activeUsers:
+                        type: integer
+                        description: Active users count
+                        example: 150
+            orders:
+                type: object
+                properties:
+                    total:
+                        type: integer
+                        description: Total number of orders
+                        example: 234
+                    pending:
+                        type: integer
+                        example: 5
+                    paid:
+                        type: integer
+                        example: 200
+                    cancelled:
+                        type: integer
+                        example: 29
+                    shipped:
+                        type: integer
+                        example: 8
+                    delivered:
+                        type: integer
+                        example: 12
+                    totalRevenue:
+                        type: number
+                        format: float
+                        description: Total revenue from paid/shipped/delivered orders
+                        example: 25678.90
+                    revenueThisMonth:
+                        type: number
+                        format: float
+                        description: Revenue for current month
+                        example: 4532.50
+                    averageTicket:
+                        type: number
+                        format: float
+                        description: Average order value
+                        example: 109.65
+            products:
+                type: object
+                properties:
+                    total:
+                        type: integer
+                        description: Total number of products
+                        example: 24
+                    mostViewed:
+                        type: array
+                        description: Top 5 most viewed products
+                        items:
+                            $ref: '#/components/schemas/DashboardProduct'
+                    mostSold:
+                        type: array
+                        description: Top 5 best selling products
+                        items:
+                            $ref: '#/components/schemas/DashboardProduct'
+                    mostFavorited:
+                        type: array
+                        description: Top 5 most favorited products
+                        items:
+                            $ref: '#/components/schemas/DashboardProductFavorite'
+            recentOrders:
+                type: array
+                description: 10 most recent orders
+                items:
+                    $ref: '#/components/schemas/RecentOrder'
+            recentUsers:
+                type: array
+                description: 10 most recent users
+                items:
+                    $ref: '#/components/schemas/RecentUser'
+
+    DashboardProduct:
+        type: object
+        properties:
+            id:
+                type: integer
+                example: 1
+            label:
+                type: string
+                example: Camiseta React
+            labelEn:
+                type: string
+                nullable: true
+                example: React T-Shirt
+            viewsCount:
+                type: integer
+                description: Only present in mostViewed
+                example: 1250
+            salesCount:
+                type: integer
+                description: Only present in mostSold
+                example: 250
+            image:
+                type: string
+                nullable: true
+                example: http://localhost:3333/media/products/camiseta-react-azul.png
+
+    DashboardProductFavorite:
+        type: object
+        properties:
+            id:
+                type: integer
+                example: 1
+            label:
+                type: string
+                example: Camiseta React
+            labelEn:
+                type: string
+                nullable: true
+                example: React T-Shirt
+            favoritesCount:
+                type: integer
+                description: Number of users who favorited this product
+                example: 85
+            image:
+                type: string
+                nullable: true
+                example: http://localhost:3333/media/products/camiseta-react-azul.png
+
+    RecentOrder:
+        type: object
+        properties:
+            id:
+                type: integer
+                example: 45
+            status:
+                type: string
+                enum: [pending, paid, cancelled, shipped, delivered]
+                example: paid
+            total:
+                type: number
+                format: float
+                example: 299.80
+            createdAt:
+                type: string
+                format: date-time
+                example: '2026-02-02T15:30:00.000Z'
+            user:
+                type: object
+                properties:
+                    id:
+                        type: integer
+                        example: 12
+                    name:
+                        type: string
+                        example: João Silva
+                    email:
+                        type: string
+                        format: email
+                        example: joao@example.com
+
+    RecentUser:
+        type: object
+        properties:
+            id:
+                type: integer
+                example: 23
+            name:
+                type: string
+                example: Maria Santos
+            email:
+                type: string
+                format: email
+                example: maria@example.com
+            createdAt:
+                type: string
+                format: date-time
+                example: '2026-02-02T10:15:00.000Z'
+
+    TopProduct:
+        type: object
+        properties:
+            id:
+                type: integer
+                example: 1
+            label:
+                type: string
+                example: Camiseta React
+            labelEn:
+                type: string
+                nullable: true
+                example: React T-Shirt
+            price:
+                type: number
+                format: float
+                example: 94.50
+            salesCount:
+                type: integer
+                description: Total historical sales
+                example: 250
+            periodSales:
+                type: integer
+                description: Sales in the specified period (only when period is 7days or 30days)
+                example: 45
+            image:
+                type: string
+                nullable: true
+                example: http://localhost:3333/media/products/camiseta-react-azul.png
 
     securitySchemes:
         BearerAuth:
