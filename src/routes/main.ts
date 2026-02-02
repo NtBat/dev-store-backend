@@ -12,6 +12,7 @@ import * as storeController from '../controllers/store';
 import * as favoriteController from '../controllers/favorite';
 import * as adminUserController from '../controllers/admin/user';
 import * as adminBannerController from '../controllers/admin/banner';
+import * as adminProductController from '../controllers/admin/product';
 export const routes = Router();
 
 routes.get('/ping', (_, res: Response) => {
@@ -164,7 +165,12 @@ routes.delete('/admin/users/:id', authMiddleware, adminMiddleware, adminUserCont
 
 // Banners routes - Admin only
 routes.get('/admin/banners', authMiddleware, adminMiddleware, adminBannerController.getAllBanners);
-routes.put('/admin/banners/reorder', authMiddleware, adminMiddleware, adminBannerController.reorderBanners);
+routes.put(
+  '/admin/banners/reorder',
+  authMiddleware,
+  adminMiddleware,
+  adminBannerController.reorderBanners
+);
 routes.get(
   '/admin/banners/:id',
   authMiddleware,
@@ -183,4 +189,48 @@ routes.delete(
   authMiddleware,
   adminMiddleware,
   adminBannerController.deleteBanner
+);
+
+// Products routes - Admin only
+routes.get(
+  '/admin/products',
+  authMiddleware,
+  adminMiddleware,
+  adminProductController.getAllProducts
+);
+routes.get(
+  '/admin/products/:id',
+  authMiddleware,
+  adminMiddleware,
+  adminProductController.getProductById
+);
+routes.post(
+  '/admin/products',
+  authMiddleware,
+  adminMiddleware,
+  adminProductController.createProduct
+);
+routes.put(
+  '/admin/products/:id',
+  authMiddleware,
+  adminMiddleware,
+  adminProductController.updateProduct
+);
+routes.delete(
+  '/admin/products/:id',
+  authMiddleware,
+  adminMiddleware,
+  adminProductController.deleteProduct
+);
+routes.post(
+  '/admin/products/:id/images',
+  authMiddleware,
+  adminMiddleware,
+  adminProductController.addProductImage
+);
+routes.delete(
+  '/admin/products/images/:imageId',
+  authMiddleware,
+  adminMiddleware,
+  adminProductController.deleteProductImage
 );

@@ -1,0 +1,189 @@
+{
+    "info": {
+        "name": "DevStore - Admin Products",
+        "description": "Collection for testing admin product management routes",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "auth": {
+        "type": "bearer",
+        "bearer": [
+            {
+                "key": "token",
+                "value": "{{admin_token}}",
+                "type": "string"
+            }
+        ]
+    },
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:3333",
+            "type": "string"
+        },
+        {
+            "key": "admin_token",
+            "value": "your-admin-token-here",
+            "type": "string"
+        },
+        {
+            "key": "product_id",
+            "value": "1",
+            "type": "string"
+        },
+        {
+            "key": "image_id",
+            "value": "1",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "List all products",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/products?page=1&limit=20",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "products"],
+                    "query": [
+                        {
+                            "key": "page",
+                            "value": "1"
+                        },
+                        {
+                            "key": "limit",
+                            "value": "20"
+                        },
+                        {
+                            "key": "categoryId",
+                            "value": "1",
+                            "disabled": true
+                        },
+                        {
+                            "key": "search",
+                            "value": "react",
+                            "disabled": true
+                        },
+                        {
+                            "key": "minPrice",
+                            "value": "50",
+                            "disabled": true
+                        },
+                        {
+                            "key": "maxPrice",
+                            "value": "100",
+                            "disabled": true
+                        }
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get product by ID",
+            "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/products/{{product_id}}",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "products", "{{product_id}}"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Create product",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"label\": \"Camiseta Vue.js\",\n  \"labelEn\": \"Vue.js T-Shirt\",\n  \"price\": 89.90,\n  \"description\": \"Camiseta de alta qualidade com estampa Vue.js\",\n  \"descriptionEn\": \"High quality t-shirt with Vue.js print\",\n  \"categoryId\": 1\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/admin/products",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "products"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Update product",
+            "request": {
+                "method": "PUT",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"label\": \"Camiseta Vue.js Atualizada\",\n  \"labelEn\": \"Updated Vue.js T-Shirt\",\n  \"price\": 79.90,\n  \"description\": \"Nova descrição do produto\",\n  \"descriptionEn\": \"New product description\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/admin/products/{{product_id}}",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "products", "{{product_id}}"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Delete product",
+            "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/products/{{product_id}}",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "products", "{{product_id}}"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Add product image",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n  \"url\": \"camiseta-vue-verde.png\"\n}"
+                },
+                "url": {
+                    "raw": "{{base_url}}/admin/products/{{product_id}}/images",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "products", "{{product_id}}", "images"]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Delete product image",
+            "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                    "raw": "{{base_url}}/admin/products/images/{{image_id}}",
+                    "host": ["{{base_url}}"],
+                    "path": ["admin", "products", "images", "{{image_id}}"]
+                }
+            },
+            "response": []
+        }
+    ]
+}
