@@ -1,4 +1,4 @@
-import express, { Request, Response } from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import { routes } from './routes/main.js';
@@ -14,7 +14,7 @@ server.use(express.json());
 server.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 server.use(routes);
 
-server.use((err: any, req: Request, res: Response) => {
+server.use((err: any, req: Request, res: Response, _next: NextFunction) => {
   console.error(err);
   res.status(500).json({ message: 'Internal server error' });
 });

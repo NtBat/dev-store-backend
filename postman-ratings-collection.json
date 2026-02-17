@@ -68,23 +68,6 @@
                         "description": "Get all approved ratings for a product"
                     },
                     "response": []
-                },
-                {
-                    "name": "Get rating average",
-                    "request": {
-                        "auth": {
-                            "type": "noauth"
-                        },
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{base_url}}/products/{{product_id}}/ratings/average",
-                            "host": ["{{base_url}}"],
-                            "path": ["products", "{{product_id}}", "ratings", "average"]
-                        },
-                        "description": "Get average rating and count for a product"
-                    },
-                    "response": []
                 }
             ]
         },

@@ -59,13 +59,21 @@ export const getOrderById = async (id: number, userId: number) => {
 
   return {
     ...order,
-    orderItems: order.orderItems.map((item) => ({
-      ...item,
-      product: {
-        ...item.product,
-        image: item.product.images[0].url ? `media/products/${item.product.images[0].url}` : null,
-        images: undefined,
-      },
-    })),
+    orderItems: order.orderItems.map((item) => {
+      const rawUrl = item.product.images[0]?.url;
+      const imagePath = rawUrl
+        ? rawUrl.startsWith('http://') || rawUrl.startsWith('https://')
+          ? rawUrl
+          : `media/products/${rawUrl}`
+        : null;
+      return {
+        ...item,
+        product: {
+          ...item.product,
+          image: imagePath,
+          images: undefined,
+        },
+      };
+    }),
   };
 };

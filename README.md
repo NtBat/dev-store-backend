@@ -1,46 +1,50 @@
-# DevStore Backend API Documentation
+# DevStore Backend
 
-This document describes all available API routes, their parameters, request/response types, and authentication requirements.
+DevStore API backend — Node.js, Express, and Prisma.
 
 ## 🚀 Quick Start
 
 ```bash
-# 1. Clone e instale dependências
+# 1. Clone and install dependencies
 git clone <repository-url> && cd backend && npm install
 
-# 2. Setup automático com Docker
+# 2. Automatic setup with Docker
 npm run setup
 
-# 3. Aplicar schema
+# 3. Apply schema
 npm run db:push
 
-# 4. Popular banco (opcional)
+# 4. Seed database (optional)
 npm run db:seed
 
-# 5. Iniciar servidor
+# 5. Start server
 npm run dev
 ```
 
-**Pronto!** Acesse `http://localhost:4000/ping` para verificar se está funcionando.
+**Done!** Visit `http://localhost:3333/ping` to verify it's working.
 
 ---
 
-## Table of Contents
+## 📚 API Documentation
+
+Full API documentation is available in **Swagger UI**:
+
+**→ [http://localhost:3333/api-docs](http://localhost:3333/api-docs)**
+
+- Interactive documentation for all endpoints
+- Test requests directly in the UI
+- Request/response schemas
+- Usage examples
+
+---
+
+## 📋 Table of Contents
 
 - [Quick Start](#-quick-start)
+- [API Documentation](#-api-documentation)
 - [Installation](#installation)
 - [Troubleshooting](#-troubleshooting)
-- [API Documentation](#-api-documentation)
-- [General](#general)
-- [Banners](#banners)
-- [Products](#products)
-- [Categories](#categories)
-- [Cart](#cart)
-- [User](#user)
-- [Orders](#orders)
-- [Webhooks](#webhooks)
-
-> 💡 **Primeira vez?** Siga o [Setup Checklist](./SETUP-CHECKLIST.md) para não pular nenhum passo!
+- [Stripe Webhook](#stripe-webhook)
 
 ---
 
@@ -48,160 +52,81 @@ npm run dev
 
 ### Prerequisites
 
-Before setting up the project, make sure you have the following installed:
-
 - **Node.js** (version 18 or higher)
-- **npm** or **yarn** package manager
-- **Docker & Docker Compose** (for local development with PostgreSQL)
-    - OR **PostgreSQL** database (version 12 or higher) if not using Docker
-- **Git** for version control
+- **npm** or **yarn**
+- **Docker & Docker Compose** (for local development)
+  - or **PostgreSQL** (version 12+) if not using Docker
+- **Git**
 
-### Setup Instructions
+### Option 1: Quick Start with Docker (Recommended) 🐳
 
-#### Option 1: Quick Start with Docker (Recomendado) 🐳
-
-1. **Clone the repository**
+1. Clone, install dependencies, and run setup:
 
     ```bash
     git clone <repository-url>
     cd backend
-    ```
-
-2. **Install dependencies**
-
-    ```bash
     npm install
-    ```
-
-3. **Setup completo automático**
-
-    ```bash
     npm run setup
     ```
 
-    Este comando irá:
-    - Copiar `.env.example` para `.env`
-    - Subir o container Docker do PostgreSQL
-    - Gerar o Prisma Client
-
-4. **Aplicar o schema do banco**
+2. Apply schema and start the server:
 
     ```bash
     npm run db:push
-    ```
-
-    Ou criar uma migration:
-
-    ```bash
-    npm run db:migrate
-    ```
-
-5. **Seed do banco de dados (opcional)**
-
-    Popule o banco com dados iniciais:
-
-    ```bash
-    npm run db:seed
-    ```
-
-6. **Iniciar o servidor**
-    ```bash
+    npm run db:seed   # optional
     npm run dev
     ```
 
-**Pronto!** 🎉 O servidor estará rodando em `http://localhost:4000`
+The server will be running at `http://localhost:3333`.
 
----
+### Option 2: Manual setup (without Docker)
 
-#### Option 2: Setup Manual (sem Docker)
-
-1. **Clone the repository**
+1. Clone, install, and configure the environment:
 
     ```bash
     git clone <repository-url>
     cd backend
-    ```
-
-2. **Install dependencies**
-
-    ```bash
     npm install
-    ```
-
-3. **Environment Configuration**
-
-    Copy the environment example file and configure your variables:
-
-    ```bash
     cp .env.example .env
     ```
 
-    Then edit the `.env` file with your specific configuration values (database URL, Stripe keys, etc.).
+2. Edit `.env` with `DATABASE_URL`, Stripe keys, etc.
 
-4. **Database Setup**
-
-    Make sure your PostgreSQL database is running and accessible. Verify your `DATABASE_URL` variable in the `.env` file is correctly configured for your database connection.
-
-5. **Run Database Migrations**
-
-    Apply the database schema:
+3. With PostgreSQL running, apply the schema:
 
     ```bash
     npx prisma migrate deploy
-    ```
-
-    Or for development with migration history:
-
-    ```bash
-    npx prisma migrate dev
-    ```
-
-6. **Generate Prisma Client**
-
-    ```bash
     npx prisma generate
-    ```
-
-7. **Seed the Database**
-
-    Populate the database with initial data (categories, products, banners):
-
-    ```bash
     npm run db:seed
+    npm run dev
     ```
 
 ---
 
 ### 🐳 Docker Commands
 
-| Command               | Description                         |
-| --------------------- | ----------------------------------- |
-| `npm run db:up`       | Inicia o container PostgreSQL       |
-| `npm run db:down`     | Para o container PostgreSQL         |
-| `npm run db:logs`     | Visualiza logs do PostgreSQL        |
-| `npm run db:generate` | Gera o Prisma Client                |
-| `npm run db:migrate`  | Cria e aplica migrations            |
-| `npm run db:push`     | Sincroniza schema (desenvolvimento) |
-| `npm run db:studio`   | Abre Prisma Studio (GUI)            |
-| `npm run db:seed`     | Popula banco com dados iniciais     |
+| Command               | Description                       |
+| -------------------- | --------------------------------- |
+| `npm run db:up`      | Start PostgreSQL container        |
+| `npm run db:down`    | Stop PostgreSQL container         |
+| `npm run db:logs`    | View PostgreSQL logs              |
+| `npm run db:generate`| Generate Prisma Client           |
+| `npm run db:migrate` | Create and apply migrations       |
+| `npm run db:push`    | Sync schema (dev)                 |
+| `npm run db:studio`  | Open Prisma Studio (GUI)          |
+| `npm run db:seed`    | Seed database with initial data   |
 
-**Configurações do Docker:**
+**Default connection:**
 
-- Host: `localhost`
-- Porta: `5432`
-- Usuário: `postgres`
-- Senha: `postgres`
+- Host: `localhost` | Port: `5432`
+- User: `postgres` | Password: `postgres`
 - Database: `devstore`
-
-Para mais detalhes sobre Docker, consulte [DOCKER.md](./DOCKER.md)
 
 ---
 
 ### 🔧 Troubleshooting
 
-#### Porta 5432 já está em uso
-
-Se você já tem PostgreSQL instalado localmente:
+#### Port 5432 already in use
 
 ```bash
 # macOS (Homebrew)
@@ -209,31 +134,25 @@ brew services stop postgresql
 
 # Linux (systemd)
 sudo systemctl stop postgresql
-
-# Ou altere a porta no docker-compose.yml
-# Mude de "5432:5432" para "5433:5432"
-# E ajuste DATABASE_URL para localhost:5433
 ```
 
-#### Container não inicia
+Or change the port in `docker-compose.yml` (e.g. `5433:5432`) and update `DATABASE_URL`.
+
+#### Container won't start
 
 ```bash
-# Ver logs detalhados
 npm run db:logs
-
-# Remover e recriar
 docker compose down -v
 npm run db:up
 ```
 
-#### Erro "Cannot find module '../generated/prisma'"
+#### Error "Cannot find module '../generated/prisma'"
 
 ```bash
-# Gerar o Prisma Client
 npm run db:generate
 ```
 
-#### Resetar banco completamente
+#### Reset database completely
 
 ```bash
 npm run db:down
@@ -245,543 +164,27 @@ npm run db:seed
 
 ---
 
-## 📚 API Documentation
+## Stripe Webhook
 
-A API possui documentação interativa com **Swagger UI**:
-
-```
-http://localhost:3333/api-docs
-```
-
-### Recursos do Swagger:
-
-- ✅ Documentação interativa de todos os endpoints
-- ✅ Testar requisições diretamente na interface
-- ✅ Ver schemas de request/response
-- ✅ Exemplos de uso
-
-Para adicionar documentação em novas rotas, consulte [SWAGGER.md](./SWAGGER.md)
-
----
-
-### Running the Project
-
-#### Development Mode
-
-```bash
-npm run dev
-```
-
-The server will start on `http://localhost:4000` (or the port specified in your `.env` file).
-
-#### Production Mode
-
-```bash
-# Build the project (if applicable)
-npm run build
-
-# Start the production server
-npm start
-```
-
-### Verifying the Installation
-
-1. **Health Check**
-
-    Visit `http://localhost:3000/ping` - you should see:
-
-    ```json
-    { "pong": true }
-    ```
-
----
-
-## General
-
-### `GET /ping`
-
-- **Description:** Health check endpoint.
-- **Auth:** None
-- **Response:**
-    ```json
-    { "pong": true }
-    ```
-
----
-
-## Banners
-
-### `GET /banners`
-
-- **Description:** Get all banners.
-- **Auth:** None
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "banners": [
-            {
-                "img": "media/banners/<filename>",
-                "link": "<url>"
-            }
-        ]
-    }
-    ```
-
----
-
-## Products
-
-### `GET /products`
-
-- **Description:** List products with optional filters.
-- **Auth:** None
-- **Query Parameters:**
-  | Name | Type | Required | Description |
-  | -------- | ------ | -------- | -------------------------------- |
-  | metadata | string | No | JSON string of metadata filters |
-  | orderBy | string | No | "views", "selling", or "price" |
-  | limit | string | No | Max number of products to return |
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "products": [
-            {
-                "id": 1,
-                "label": "Product Name",
-                "price": 99.99,
-                "image": "media/products/<filename>",
-                "liked": false
-            }
-        ]
-    }
-    ```
-
-### `GET /product/:id`
-
-- **Description:** Get a single product by ID.
-- **Auth:** None
-- **Params:**
-  | Name | Type | Required |
-  | ---- | ---------------- | -------- |
-  | id | string (numeric) | Yes |
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "product": {
-            "id": 1,
-            "label": "Product Name",
-            "price": 99.99,
-            "description": "...",
-            "categoryId": 1,
-            "images": ["media/products/<filename>"]
-        },
-        "category": {
-            "id": 1,
-            "name": "Category Name",
-            "slug": "category-slug"
-        }
-    }
-    ```
-
-### `GET /product/:id/related`
-
-- **Description:** Get related products from the same category.
-- **Auth:** None
-- **Params:**
-  | Name | Type | Required |
-  | ---- | ---------------- | -------- |
-  | id | string (numeric) | Yes |
-- **Query:**
-  | Name | Type | Required |
-  | ----- | ---------------- | -------- |
-  | limit | string (numeric) | No |
-- **Response:**
-    ```json
-    {
-      "error": null,
-      "products": [ ... ]
-    }
-    ```
-
----
-
-## Categories
-
-### `GET /category/:slug/metadata`
-
-- **Description:** Get category and its metadata by slug.
-- **Auth:** None
-- **Params:**
-  | Name | Type | Required |
-  | ---- | ------ | -------- |
-  | slug | string | Yes |
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "category": {
-            "id": 1,
-            "name": "Category Name",
-            "slug": "category-slug"
-        },
-        "metadata": [
-            {
-                "id": "meta_id",
-                "name": "Meta Name",
-                "values": [{ "id": "value_id", "label": "Value Label" }]
-            }
-        ]
-    }
-    ```
-
----
-
-## Cart
-
-### `POST /cart/mount`
-
-- **Description:** Get product details for a list of product IDs.
-- **Auth:** None
-- **Body:**
-    ```json
-    { "ids": [1, 2, 3] }
-    ```
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "products": [
-            {
-                "id": 1,
-                "label": "Product Name",
-                "price": 99.99,
-                "image": "media/products/<filename>"
-            }
-        ]
-    }
-    ```
-
-### `GET /cart/shipping`
-
-- **Description:** Calculate shipping cost and days for a zipcode.
-- **Auth:** None
-- **Query:**
-  | Name | Type | Required |
-  | ------- | ------ | -------- |
-  | zipcode | string | Yes |
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "zipcode": "12345-678",
-        "cost": 7,
-        "days": 3
-    }
-    ```
-
-### `POST /cart/finish`
-
-- **Description:** Finish the cart and create an order (returns Stripe checkout URL).
-- **Auth:** Yes (Bearer token)
-- **Body:**
-    ```json
-    {
-        "cart": [{ "productId": 1, "quantity": 2 }],
-        "addressId": 1
-    }
-    ```
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "url": "https://checkout.stripe.com/..."
-    }
-    ```
-
----
-
-## User
-
-### `POST /user/register`
-
-- **Description:** Register a new user.
-- **Auth:** None
-- **Body:**
-    ```json
-    {
-        "name": "User Name",
-        "email": "user@email.com",
-        "password": "password123"
-    }
-    ```
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "user": {
-            "id": 1,
-            "name": "User Name",
-            "email": "user@email.com"
-        }
-    }
-    ```
-
-### `POST /user/login`
-
-- **Description:** Login and receive a token.
-- **Auth:** None
-- **Body:**
-    ```json
-    {
-        "email": "user@email.com",
-        "password": "password123"
-    }
-    ```
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "token": "<uuid>"
-    }
-    ```
-
-### `GET /user/addresses`
-
-- **Description:** Get all addresses for the logged-in user.
-- **Auth:** Yes (Bearer token)
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "addresses": [
-            {
-                "id": 1,
-                "zipcode": "12345-678",
-                "street": "Street Name",
-                "number": "123",
-                "city": "City",
-                "state": "State",
-                "country": "Country",
-                "complement": "Apt 1"
-            }
-        ]
-    }
-    ```
-
-### `POST /user/addresses`
-
-- **Description:** Add a new address for the logged-in user.
-- **Auth:** Yes (Bearer token)
-- **Body:**
-    ```json
-    {
-        "zipcode": "12345-678",
-        "street": "Street Name",
-        "number": "123",
-        "city": "City",
-        "state": "State",
-        "country": "Country",
-        "complement": "Apt 1"
-    }
-    ```
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "address": {
-            "id": 1,
-            "zipcode": "12345-678",
-            "street": "Street Name",
-            "number": "123",
-            "city": "City",
-            "state": "State",
-            "country": "Country",
-            "complement": "Apt 1"
-        }
-    }
-    ```
-
----
-
-## Orders
-
-### `GET /orders`
-
-- **Description:** List all orders for the logged-in user.
-- **Auth:** Yes (Bearer token)
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "orders": [
-            {
-                "id": 1,
-                "status": "pending",
-                "total": 199.99,
-                "createdAt": "2024-07-24T18:49:43.000Z"
-            }
-        ]
-    }
-    ```
-
-### `GET /orders/:id`
-
-- **Description:** Get details of a specific order by ID for the logged-in user.
-- **Auth:** Yes (Bearer token)
-- **Params:**
-  | Name | Type | Required |
-  | ---- | ---------------- | -------- |
-  | id | string (numeric) | Yes |
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "order": {
-            "id": 1,
-            "status": "pending",
-            "total": 199.99,
-            "shippingCost": 7,
-            "shippingDays": 3,
-            "shippingZipcode": "12345-678",
-            "shippingStreet": "Street Name",
-            "shippingNumber": "123",
-            "shippingCity": "City",
-            "shippingState": "State",
-            "shippingCountry": "Country",
-            "shippingComplement": "Apt 1",
-            "createdAt": "2024-07-24T18:49:43.000Z",
-            "orderItems": [
-                {
-                    "id": 1,
-                    "quantity": 2,
-                    "price": 99.99,
-                    "product": {
-                        "id": 1,
-                        "label": "Product Name",
-                        "price": 99.99,
-                        "image": "media/products/<filename>"
-                    }
-                }
-            ]
-        }
-    }
-    ```
-
-### `GET /orders/session`
-
-- **Description:** Get order ID by Stripe session ID.
-- **Auth:** None
-- **Query:**
-  | Name | Type | Required | Description |
-  | ---------- | ------ | -------- | -------------------------- |
-  | session_id | string | Yes | Stripe checkout session ID |
-- **Response:**
-    ```json
-    {
-        "error": null,
-        "orderId": 123
-    }
-    ```
-
----
-
-## Webhooks
-
-### `POST /webhook/stripe`
-
-- **Description:** Handle Stripe payment events and update order statuses.
-- **Auth:** None (verified via Stripe signature)
-- **Purpose:** Processes Stripe webhook events to automatically update order statuses
-- **Supported Events:**
-    - `checkout.session.completed` - Marks order as `paid`
-    - `checkout.session.expired` - Marks order as `expired`
-    - `payment_intent.payment_failed` - Marks order as `failed`
-- **Order Status Values:**
-    - `pending` - Order created, waiting for payment
-    - `paid` - Payment completed successfully
-    - `expired` - Checkout session expired
-    - `failed` - Payment failed
-
----
-
-## Authentication
-
-Some endpoints require authentication via a Bearer token. Pass the token in the `Authorization` header:
-
-```
-Authorization: Bearer <token>
-```
-
----
-
-## Error Handling
-
-All endpoints return an `error` field. If the request is successful, `error` is `null`. Otherwise, it contains an error message.
-
----
-
-## Data Models
-
-See `prisma/schema.prisma` for full database models.
-
----
-
-## Stripe Webhook Setup
-
-The application includes a Stripe webhook endpoint to handle payment events and automatically update order statuses.
-
-### Environment Variables Required
-
-Add these environment variables to your `.env` file:
+### Environment variables
 
 ```env
-STRIPE_SECRET_KEY=your_stripe_secret_key
-STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+STRIPE_SECRET_KEY=sk_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-### Setting up the Webhook in Stripe Dashboard
+### Stripe Dashboard setup
 
-1. Go to your Stripe Dashboard
-2. Navigate to Developers > Webhooks
-3. Click "Add endpoint"
-4. Set the endpoint URL to: `https://your-domain.com/webhook/stripe`
-5. Select the following events:
-    - `checkout.session.completed`
-    - `checkout.session.expired`
-    - `payment_intent.payment_failed`
-6. Copy the webhook signing secret and add it to your environment variables as `STRIPE_WEBHOOK_SECRET`
+1. **Developers** → **Webhooks** → **Add endpoint**
+2. URL: `https://your-domain.com/webhook/stripe`
+3. Events: `checkout.session.completed`, `checkout.session.expired`, `payment_intent.payment_failed`
+4. Copy the signing secret to `STRIPE_WEBHOOK_SECRET`
 
-### Security
+The endpoint verifies the Stripe signature. Keep the secret secure and use HTTPS in production.
 
-The webhook endpoint verifies the Stripe signature to ensure requests are legitimate. Make sure to:
+---
 
-- Keep your `STRIPE_WEBHOOK_SECRET` secure
-- Use HTTPS in production
-- Never expose the webhook secret in client-side code
+## Structure and models
 
-# Todo
-
-- [x] Implement wishlist post
-- [x] Implement wishlist get
-- [x] Implement wishlist delete
-- [x] Implement translations
-
-- [ ] Implement price with card
-
-- [ ] Implement shipping cost logic
-- [ ] Implement shipping days logic
-
-- [ ] Implement buy together post
-- [ ] Implement buy together get
-- [ ] Implement buy together delete
-- [ ] Implement buy together delete all
-
-- [ ] Implement order bump post
-- [ ] Implement order bump get
-- [ ] Implement order bump delete
-- [ ] Implement order bump delete all
-
-- [ ] Implement rating system
+- **Data models:** `prisma/schema.prisma`
+- **Authentication:** `Authorization: Bearer <token>` for protected endpoints

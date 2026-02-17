@@ -34,10 +34,12 @@ export const getCategoryMetadata = async (id: number) => {
     select: {
       id: true,
       name: true,
+      nameEn: true,
       values: {
         select: {
           id: true,
           label: true,
+          labelEn: true,
         },
       },
     },
@@ -145,6 +147,7 @@ export const deleteCategory = async (id: number) => {
 export const createCategoryMetadata = async (data: {
   id: string;
   name: string;
+  nameEn?: string;
   categoryId: number;
 }) => {
   // Check if metadata id already exists
@@ -160,6 +163,7 @@ export const createCategoryMetadata = async (data: {
     data: {
       id: data.id,
       name: data.name,
+      nameEn: data.nameEn,
       categoryId: data.categoryId,
     },
   });
@@ -167,10 +171,13 @@ export const createCategoryMetadata = async (data: {
   return metadata;
 };
 
-export const updateCategoryMetadata = async (id: string, data: { name: string }) => {
+export const updateCategoryMetadata = async (
+  id: string,
+  data: { name?: string; nameEn?: string }
+) => {
   const metadata = await prisma.categoryMetadata.update({
     where: { id },
-    data: { name: data.name },
+    data,
   });
 
   return metadata;
@@ -187,6 +194,7 @@ export const deleteCategoryMetadata = async (id: string) => {
 export const createMetadataValue = async (data: {
   id: string;
   label: string;
+  labelEn?: string;
   categoryMetadataId: string;
 }) => {
   // Check if value id already exists
@@ -202,6 +210,7 @@ export const createMetadataValue = async (data: {
     data: {
       id: data.id,
       label: data.label,
+      labelEn: data.labelEn,
       categoryMetadataId: data.categoryMetadataId,
     },
   });
@@ -209,10 +218,10 @@ export const createMetadataValue = async (data: {
   return value;
 };
 
-export const updateMetadataValue = async (id: string, data: { label: string }) => {
+export const updateMetadataValue = async (id: string, data: { label?: string; labelEn?: string }) => {
   const value = await prisma.metadataValue.update({
     where: { id },
-    data: { label: data.label },
+    data,
   });
 
   return value;

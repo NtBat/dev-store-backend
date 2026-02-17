@@ -1,4 +1,42 @@
+import bcrypt from 'bcryptjs';
 import { prisma } from '../../libs/prisma';
+
+type CreateUserData = {
+  name: string;
+  email: string;
+  password: string;
+  role?: 'customer' | 'admin';
+};
+
+export const createUser = async (data: CreateUserData) => {
+  const existingUser = await prisma.user.findUnique({
+    where: { email: data.email.toLowerCase() },
+  });
+
+  if (existingUser) {
+    return null;
+  }
+
+  const hashedPassword = await bcrypt.hash(data.password, 10);
+
+  const user = await prisma.user.create({
+    data: {
+      name: data.name,
+      email: data.email.toLowerCase(),
+      password: hashedPassword,
+      role: data.role || 'customer',
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+    },
+  });
+
+  return user;
+};
 
 type GetUsersFilters = {
   page?: number;
@@ -135,10 +173,54 @@ export const getUserById = async (id: number) => {
   };
 };
 
-export const updateUser = async (id: number, data: { name?: string; email?: string }) => {
+type UpdateUserData = {
+  name?: string;
+  email?: string;
+  password?: string;
+  role?: 'customer' | 'admin';
+};
+
+export const updateUser = async (id: number, data: UpdateUserData) => {
+  const updateData: {
+    name?: string;
+    email?: string;
+    password?: string;
+    role?: 'customer' | 'admin';
+  } = {};
+
+  if (data.name) updateData.name = data.name;
+  if (data.email) updateData.email = data.email.toLowerCase();
+  if (data.password) updateData.password = await bcrypt.hash(data.password, 10);
+  if (data.role) updateData.role = data.role;
+
+  if (Object.keys(updateData).length === 0) {
+    return await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  if (data.email) {
+    const emailExists = await prisma.user.findFirst({
+      where: { email: data.email!.toLowerCase(), id: { not: id } },
+    });
+    if (emailExists) {
+      const err = new Error('Email already in use') as Error & { code: string };
+      err.code = 'EMAIL_TAKEN';
+      throw err;
+    }
+  }
+
   return await prisma.user.update({
     where: { id },
-    data,
+    data: updateData,
     select: {
       id: true,
       name: true,
@@ -146,19 +228,6 @@ export const updateUser = async (id: number, data: { name?: string; email?: stri
       role: true,
       createdAt: true,
       updatedAt: true,
-    },
-  });
-};
-
-export const updateUserRole = async (id: number, role: string) => {
-  return await prisma.user.update({
-    where: { id },
-    data: { role },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
     },
   });
 };

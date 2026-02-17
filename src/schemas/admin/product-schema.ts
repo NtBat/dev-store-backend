@@ -22,6 +22,17 @@ export const createProductSchema = z.object({
   categoryId: z.number().int().positive('Category ID is required'),
 });
 
+const variantUpdateSchema = z.object({
+  id: z.coerce.number().int().positive().optional(),
+  size: z.string().min(1, 'Size is required'),
+  stock: z.number().int().min(0, 'Stock must be non-negative'),
+});
+
+const imageUpdateSchema = z.object({
+  id: z.coerce.number().int().positive().optional(),
+  url: z.string().min(1, 'Image URL is required'),
+});
+
 export const updateProductSchema = z.object({
   label: z.string().min(1).optional(),
   labelEn: z.string().optional(),
@@ -29,6 +40,8 @@ export const updateProductSchema = z.object({
   description: z.string().optional(),
   descriptionEn: z.string().optional(),
   categoryId: z.number().int().positive().optional(),
+  variants: z.array(variantUpdateSchema).optional(),
+  images: z.array(imageUpdateSchema).optional(),
 });
 
 export const addProductImageSchema = z.object({

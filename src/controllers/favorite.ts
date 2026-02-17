@@ -55,9 +55,7 @@ export const getUserFavorites = async (req: Request, res: Response) => {
       createdAt: fav.createdAt,
       product: {
         ...fav.product,
-        image: fav.product.images[0]
-          ? getAbsoluteImageUrl(fav.product.images[0].url)
-          : null,
+        image: fav.product.images[0] ? getAbsoluteImageUrl(fav.product.images[0].url) : null,
       },
     }));
 
@@ -78,9 +76,7 @@ export const getAllFavoritesGrouped = async (req: Request, res: Response) => {
     const favoritesWithAbsoluteUrl = favorites.map((fav) => ({
       product: {
         ...fav.product,
-        image: fav.product?.images[0]
-          ? getAbsoluteImageUrl(fav.product.images[0].url)
-          : null,
+        image: fav.product?.images[0] ? getAbsoluteImageUrl(fav.product.images[0].url) : null,
       },
       count: fav.count,
       users: fav.users,

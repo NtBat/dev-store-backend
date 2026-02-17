@@ -4,6 +4,7 @@ type ProductFilters = {
   metadata?: { [key: string]: string };
   order?: 'views' | 'selling' | 'price';
   limit?: number;
+  categorySlug?: string;
   userId?: number;
 };
 
@@ -22,7 +23,7 @@ export const getAllProducts = async (filters: ProductFilters) => {
       break;
   }
 
-  let where = {};
+  let where: any = {};
   if (filters.metadata && typeof filters.metadata === 'object') {
     let metaFilters = [];
     for (let categoryMetadataId in filters.metadata) {
@@ -55,6 +56,12 @@ export const getAllProducts = async (filters: ProductFilters) => {
     }
   }
 
+  if (filters.categorySlug) {
+    where.category = {
+      slug: filters.categorySlug,
+    };
+  }
+
   const products = await prisma.product.findMany({
     select: {
       id: true,
@@ -64,7 +71,7 @@ export const getAllProducts = async (filters: ProductFilters) => {
       images: {
         take: 1,
         orderBy: {
-          id: 'asc',
+          id: 'desc',
         },
       },
     },
@@ -89,11 +96,39 @@ export const getAllProducts = async (filters: ProductFilters) => {
     favoritedProductIds = new Set(favorites.map((f) => f.productId));
   }
 
+  const ratingsData = await prisma.productRating.groupBy({
+    by: ['productId'],
+    where: {
+      productId: {
+        in: products.map((p) => p.id),
+      },
+      approved: true,
+    },
+    _avg: {
+      rating: true,
+    },
+    _count: {
+      rating: true,
+    },
+  });
+
+  const ratingsMap = new Map(
+    ratingsData.map((r) => [
+      r.productId,
+      {
+        average: r._avg.rating ? Math.round(r._avg.rating * 10) / 10 : 0,
+        count: r._count.rating,
+      },
+    ])
+  );
+
   return products.map((product) => ({
     ...product,
-    image: product.images[0].url ? `media/products/${product.images[0].url}` : null,
+    image: product.images[0]?.url || null,
     images: undefined,
     liked: favoritedProductIds.has(product.id),
+    ratingAverage: ratingsMap.get(product.id)?.average ?? 0,
+    ratingCount: ratingsMap.get(product.id)?.count ?? 0,
   }));
 };
 
@@ -127,11 +162,28 @@ export const getProduct = async (id: number, userId?: number) => {
     liked = !!favorite;
   }
 
+  const approvedRatings = await prisma.productRating.findMany({
+    where: {
+      productId: id,
+      approved: true,
+    },
+    select: {
+      rating: true,
+    },
+  });
+
+  let ratingAverage = 0;
+  if (approvedRatings.length > 0) {
+    const sum = approvedRatings.reduce((acc, r) => acc + r.rating, 0);
+    ratingAverage = Math.round((sum / approvedRatings.length) * 10) / 10;
+  }
+
   return {
     ...product,
-    images:
-      product.images.length > 0 ? product.images.map((image) => `media/products/${image.url}`) : [],
+    images: product.images.length > 0 ? product.images.map((image) => image.url) : [],
     liked,
+    ratingAverage,
+    ratingCount: approvedRatings.length,
   };
 };
 
@@ -172,7 +224,7 @@ export const getProductsFromSameCategory = async (
       images: {
         take: 1,
         orderBy: {
-          id: 'asc',
+          id: 'desc',
         },
       },
     },
@@ -198,10 +250,38 @@ export const getProductsFromSameCategory = async (
     favoritedProductIds = new Set(favorites.map((f) => f.productId));
   }
 
+  const ratingsData = await prisma.productRating.groupBy({
+    by: ['productId'],
+    where: {
+      productId: {
+        in: products.map((p) => p.id),
+      },
+      approved: true,
+    },
+    _avg: {
+      rating: true,
+    },
+    _count: {
+      rating: true,
+    },
+  });
+
+  const ratingsMap = new Map(
+    ratingsData.map((r) => [
+      r.productId,
+      {
+        average: r._avg.rating ? Math.round(r._avg.rating * 10) / 10 : 0,
+        count: r._count.rating,
+      },
+    ])
+  );
+
   return products.map((product) => ({
     ...product,
-    image: product.images[0].url ? `media/products/${product.images[0].url}` : null,
+    image: product.images[0]?.url || null,
     images: undefined,
     liked: favoritedProductIds.has(product.id),
+    ratingAverage: ratingsMap.get(product.id)?.average ?? 0,
+    ratingCount: ratingsMap.get(product.id)?.count ?? 0,
   }));
 };

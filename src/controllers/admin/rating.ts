@@ -5,7 +5,7 @@ import {
   getRatingByIdSchema,
   updateRatingStatusSchema,
 } from '../../schemas/admin/rating-schema.js';
-import { getAbsoluteImageUrl } from '../../utils/get-absolute-image-url.js';
+import { getProductImageUrl } from '../../utils/get-absolute-image-url.js';
 
 export const getAllRatings = async (req: Request, res: Response) => {
   try {
@@ -24,7 +24,7 @@ export const getAllRatings = async (req: Request, res: Response) => {
       ...rating,
       product: {
         ...rating.product,
-        image: rating.product.images[0] ? getAbsoluteImageUrl(rating.product.images[0].url) : null,
+        image: getProductImageUrl(rating.product.images[0]?.url),
         images: undefined,
       },
     }));
@@ -61,7 +61,7 @@ export const getRatingById = async (req: Request, res: Response) => {
       ...rating,
       product: {
         ...rating.product,
-        image: rating.product.images[0] ? getAbsoluteImageUrl(rating.product.images[0].url) : null,
+        image: getProductImageUrl(rating.product.images[0]?.url),
         images: undefined,
       },
     };

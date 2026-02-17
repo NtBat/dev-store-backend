@@ -18,6 +18,17 @@ type CreateProductData = {
   categoryId: number;
 };
 
+type VariantUpdateItem = {
+  id?: number;
+  size: string;
+  stock: number;
+};
+
+type ImageUpdateItem = {
+  id?: number;
+  url: string;
+};
+
 type UpdateProductData = {
   label?: string;
   labelEn?: string;
@@ -25,6 +36,8 @@ type UpdateProductData = {
   description?: string;
   descriptionEn?: string;
   categoryId?: number;
+  variants?: VariantUpdateItem[];
+  images?: ImageUpdateItem[];
 };
 
 export const getAllProducts = async (filters: GetProductsFilters) => {
@@ -203,16 +216,84 @@ export const createProduct = async (data: CreateProductData) => {
 };
 
 export const updateProduct = async (id: number, data: UpdateProductData) => {
+  const productData: Record<string, unknown> = {
+    ...(data.label !== undefined && { label: data.label }),
+    ...(data.labelEn !== undefined && { labelEn: data.labelEn || null }),
+    ...(data.price !== undefined && { price: data.price }),
+    ...(data.description !== undefined && { description: data.description || null }),
+    ...(data.descriptionEn !== undefined && { descriptionEn: data.descriptionEn || null }),
+    ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
+  };
+
+  if (data.variants && data.variants.length > 0) {
+    for (const variant of data.variants) {
+      if (variant.id) {
+        const existing = await prisma.productVariant.findFirst({
+          where: { id: variant.id, productId: id },
+        });
+        if (existing) {
+          await prisma.productVariant.update({
+            where: { id: variant.id },
+            data: { size: variant.size, stock: variant.stock },
+          });
+        }
+      } else {
+        await prisma.productVariant.upsert({
+          where: {
+            productId_size: { productId: id, size: variant.size },
+          },
+          create: {
+            productId: id,
+            size: variant.size,
+            stock: variant.stock,
+          },
+          update: { stock: variant.stock },
+        });
+      }
+    }
+  }
+
+  if (data.images !== undefined) {
+    const currentImages = await prisma.productImage.findMany({
+      where: { productId: id },
+      select: { id: true },
+    });
+    const currentIds = new Set(currentImages.map((img) => img.id));
+    const idsToKeep = new Set(
+      data.images
+        .filter((img): img is ImageUpdateItem & { id: number } => typeof img.id === 'number')
+        .map((img) => img.id)
+    );
+
+    for (const image of data.images) {
+      if (image.id) {
+        const belongsToProduct = await prisma.productImage.findFirst({
+          where: { id: image.id, productId: id },
+        });
+        if (belongsToProduct) {
+          await prisma.productImage.update({
+            where: { id: image.id },
+            data: { url: image.url },
+          });
+        }
+      } else {
+        await prisma.productImage.create({
+          data: { productId: id, url: image.url },
+        });
+      }
+    }
+
+    const idsToDelete = [...currentIds].filter((imgId) => !idsToKeep.has(imgId));
+    if (idsToDelete.length > 0) {
+      await prisma.productImage.deleteMany({
+        where: { id: { in: idsToDelete }, productId: id },
+      });
+    }
+  }
+
   const product = await prisma.product.update({
     where: { id },
-    data: {
-      ...(data.label !== undefined && { label: data.label }),
-      ...(data.labelEn !== undefined && { labelEn: data.labelEn || null }),
-      ...(data.price !== undefined && { price: data.price }),
-      ...(data.description !== undefined && { description: data.description || null }),
-      ...(data.descriptionEn !== undefined && { descriptionEn: data.descriptionEn || null }),
-      ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
-    },
+    data: productData,
     select: {
       id: true,
       label: true,
@@ -225,6 +306,21 @@ export const updateProduct = async (id: number, data: UpdateProductData) => {
       salesCount: true,
       createdAt: true,
       updatedAt: true,
+      variants: {
+        select: {
+          id: true,
+          size: true,
+          stock: true,
+        },
+        orderBy: { size: 'asc' },
+      },
+      images: {
+        select: {
+          id: true,
+          url: true,
+        },
+        orderBy: { id: 'asc' },
+      },
     },
   });
 
@@ -266,15 +362,6 @@ export const addProductVariant = async (productId: number, size: string, stock: 
   return variant;
 };
 
-export const updateProductVariant = async (variantId: number, stock: number) => {
-  const variant = await prisma.productVariant.update({
-    where: { id: variantId },
-    data: { stock },
-  });
-
-  return variant;
-};
-
 export const deleteProductVariant = async (variantId: number) => {
   await prisma.productVariant.delete({
     where: { id: variantId },
@@ -291,6 +378,12 @@ export const getProductStats = async () => {
         labelEn: true,
         salesCount: true,
         price: true,
+        variants: {
+          select: {
+            size: true,
+            stock: true,
+          },
+        },
         images: {
           take: 1,
           orderBy: { id: 'asc' },
@@ -308,6 +401,12 @@ export const getProductStats = async () => {
         labelEn: true,
         viewsCount: true,
         price: true,
+        variants: {
+          select: {
+            size: true,
+            stock: true,
+          },
+        },
         images: {
           take: 1,
           orderBy: { id: 'asc' },
@@ -354,15 +453,15 @@ export const getProductStats = async () => {
         label: true,
         labelEn: true,
         price: true,
-        images: {
-          take: 1,
-          orderBy: { id: 'asc' },
-        },
         variants: {
           select: {
             size: true,
             stock: true,
           },
+        },
+        images: {
+          take: 1,
+          orderBy: { id: 'asc' },
         },
       },
     }),

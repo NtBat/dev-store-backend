@@ -31,7 +31,6 @@ routes.get('/products/:id/related', optionalAuthMiddleware, productController.ge
 
 routes.post('/products/:id/ratings', authMiddleware, ratingController.createRating);
 routes.get('/products/:id/ratings', ratingController.getProductRatings);
-routes.get('/products/:id/ratings/average', ratingController.getProductRatingAverage);
 
 routes.get('/category/:slug/metadata', categoryController.getCategoryWithMetadata);
 
@@ -107,8 +106,12 @@ routes.post('/cart/finish', authMiddleware, cartController.finishCart);
 
 routes.post('/user/register', userController.createUser);
 routes.post('/user/login', userController.loginUser);
+routes.get('/user/me', authMiddleware, userController.getUserProfile);
+routes.put('/user/me', authMiddleware, userController.updateUserProfile);
 routes.post('/user/addresses', authMiddleware, userController.createUserAddress);
 routes.get('/user/addresses', authMiddleware, userController.getUserAddresses);
+routes.put('/user/addresses/:id', authMiddleware, userController.updateUserAddress);
+routes.delete('/user/addresses/:id', authMiddleware, userController.deleteUserAddress);
 
 routes.post('/webhook/stripe', webhookController.stripe);
 
@@ -154,6 +157,7 @@ routes.get(
 );
 
 // Users routes - Admin only
+routes.post('/admin/users', authMiddleware, adminMiddleware, adminUserController.createUser);
 routes.get('/admin/users', authMiddleware, adminMiddleware, adminUserController.getAllUsers);
 routes.get(
   '/admin/users/stats',
@@ -163,12 +167,6 @@ routes.get(
 );
 routes.get('/admin/users/:id', authMiddleware, adminMiddleware, adminUserController.getUserById);
 routes.put('/admin/users/:id', authMiddleware, adminMiddleware, adminUserController.updateUser);
-routes.put(
-  '/admin/users/:id/role',
-  authMiddleware,
-  adminMiddleware,
-  adminUserController.updateUserRole
-);
 routes.delete('/admin/users/:id', authMiddleware, adminMiddleware, adminUserController.deleteUser);
 
 // Banners routes - Admin only
@@ -253,12 +251,6 @@ routes.post(
   authMiddleware,
   adminMiddleware,
   adminProductController.addProductVariant
-);
-routes.put(
-  '/admin/products/variants/:variantId',
-  authMiddleware,
-  adminMiddleware,
-  adminProductController.updateProductVariant
 );
 routes.delete(
   '/admin/products/variants/:variantId',

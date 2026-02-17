@@ -85,6 +85,85 @@ export const getUserByToken = async (token: string) => {
   return user;
 };
 
+export const getUserProfile = async (userId: number) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  return user;
+};
+
+type UpdateUserProfileData = {
+  name?: string;
+  email?: string;
+  password?: string;
+};
+
+export const updateUserProfile = async (
+  userId: number,
+  data: UpdateUserProfileData
+) => {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  const updateData: { name?: string; email?: string; password?: string } = {};
+
+  if (data.name) {
+    updateData.name = data.name;
+  }
+
+  if (data.email) {
+    const emailExists = await prisma.user.findFirst({
+      where: {
+        email: data.email.toLowerCase(),
+        id: { not: userId },
+      },
+    });
+    if (emailExists) {
+      return 'EMAIL_TAKEN';
+    }
+    updateData.email = data.email.toLowerCase();
+  }
+
+  if (data.password) {
+    updateData.password = await bcrypt.hash(data.password, 10);
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    return user;
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: userId },
+    data: updateData,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      createdAt: true,
+    },
+  });
+
+  return updatedUser;
+};
+
 export const createUserAddress = async (userId: number, address: Address) => {
   return await prisma.userAddress.create({
     data: {
@@ -125,4 +204,48 @@ export const getUserAddressById = async (userId: number, addressId: number) => {
       complement: true,
     },
   });
+};
+
+export const updateUserAddress = async (
+  userId: number,
+  addressId: number,
+  address: Address
+) => {
+  const existing = await prisma.userAddress.findFirst({
+    where: { id: addressId, userId },
+  });
+
+  if (!existing) {
+    return null;
+  }
+
+  return await prisma.userAddress.update({
+    where: { id: addressId },
+    data: {
+      zipcode: address.zipcode,
+      street: address.street,
+      number: address.number,
+      city: address.city,
+      state: address.state,
+      country: address.country,
+      complement: address.complement || '',
+    },
+    select: {
+      id: true,
+      zipcode: true,
+      street: true,
+      number: true,
+      city: true,
+      state: true,
+      country: true,
+      complement: true,
+    },
+  });
+};
+
+export const deleteUserAddress = async (userId: number, addressId: number) => {
+  const result = await prisma.userAddress.deleteMany({
+    where: { id: addressId, userId },
+  });
+  return result.count > 0;
 };

@@ -5,7 +5,7 @@ import {
   getOrdersQuerySchema,
   updateOrderStatusSchema,
 } from '../../schemas/admin/order-schema';
-import { getAbsoluteImageUrl } from '../../utils/get-absolute-image-url';
+import { getProductImageUrl } from '../../utils/get-absolute-image-url';
 
 export const getAllOrders = async (req: Request, res: Response) => {
   try {
@@ -62,9 +62,7 @@ export const getOrderById = async (req: Request, res: Response) => {
         ...item,
         product: {
           ...item.product,
-          image: item.product.images[0]
-            ? getAbsoluteImageUrl(`media/products/${item.product.images[0].url}`)
-            : null,
+          image: getProductImageUrl(item.product.images[0]?.url),
           images: undefined,
         },
       })),

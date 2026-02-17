@@ -20,10 +20,22 @@ export const getProducts: RequestHandler = async (req: Request, res: Response) =
     return;
   }
 
-  const { metadata, orderBy, limit } = parseResult.data;
+  const { metadata, orderBy, limit, categorySlug } = parseResult.data;
 
   const parsedLimit = limit ? parseInt(limit) : undefined;
-  const parsedMetadata = metadata ? JSON.parse(metadata) : undefined;
+  
+  let parsedMetadata: { [key: string]: string } | undefined;
+  if (metadata) {
+    try {
+      parsedMetadata = JSON.parse(metadata);
+    } catch {
+      parsedMetadata = undefined;
+    }
+  }
+
+  if (!parsedMetadata && req.query.metadata && typeof req.query.metadata === 'object') {
+    parsedMetadata = req.query.metadata as { [key: string]: string };
+  }
 
   const userId = (req as any).userId;
 
@@ -31,15 +43,11 @@ export const getProducts: RequestHandler = async (req: Request, res: Response) =
     metadata: parsedMetadata,
     order: orderBy,
     limit: parsedLimit,
+    categorySlug,
     userId,
   });
 
-  const productsWithAbsoluteUrl = products.map((product) => ({
-    ...product,
-    image: product.image ? getAbsoluteImageUrl(product.image) : null,
-  }));
-
-  res.json({ error: null, products: productsWithAbsoluteUrl });
+  res.json({ error: null, products });
 };
 
 export const getProductById: RequestHandler = async (req: Request, res: Response) => {
@@ -59,16 +67,11 @@ export const getProductById: RequestHandler = async (req: Request, res: Response
     return;
   }
 
-  const productWithAbsoluteImages = {
-    ...product,
-    images: product.images.map((image) => getAbsoluteImageUrl(image)),
-  };
-
   const category = await getCategory(product.categoryId);
 
   await incrementProductView(product.id);
 
-  res.json({ error: null, product: productWithAbsoluteImages, category });
+  res.json({ error: null, product, category });
 };
 
 export const getProductRelated: RequestHandler = async (req: Request, res: Response) => {
@@ -95,10 +98,5 @@ export const getProductRelated: RequestHandler = async (req: Request, res: Respo
     return;
   }
 
-  const productsWithAbsoluteUrl = products.map((product) => ({
-    ...product,
-    image: product.image ? getAbsoluteImageUrl(product.image) : null,
-  }));
-
-  res.json({ error: null, products: productsWithAbsoluteUrl });
+  res.json({ error: null, products });
 };

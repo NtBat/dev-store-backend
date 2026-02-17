@@ -19,11 +19,19 @@ export const createCart = async (ids: number[]) => {
     },
   });
 
-  return products.map((product) => ({
-    ...product,
-    image: product.images[0].url ? `media/products/${product.images[0].url}` : null,
-    images: undefined,
-  }));
+  return products.map((product) => {
+    const rawUrl = product.images[0]?.url;
+    const imagePath = rawUrl
+      ? rawUrl.startsWith('http://') || rawUrl.startsWith('https://')
+        ? rawUrl
+        : `media/products/${rawUrl}`
+      : null;
+    return {
+      ...product,
+      image: imagePath,
+      images: undefined,
+    };
+  });
 };
 
 type CreateOrderParams = {

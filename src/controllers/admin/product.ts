@@ -8,10 +8,9 @@ import {
   addProductImageSchema,
   deleteProductImageSchema,
   addProductVariantSchema,
-  updateProductVariantSchema,
   deleteProductVariantSchema,
 } from '../../schemas/admin/product-schema';
-import { getAbsoluteImageUrl } from '../../utils/get-absolute-image-url';
+import { getProductImageUrl } from '../../utils/get-absolute-image-url';
 
 export const getAllProducts = async (req: Request, res: Response) => {
   try {
@@ -34,9 +33,7 @@ export const getAllProducts = async (req: Request, res: Response) => {
 
     const productsWithAbsoluteUrl = result.products.map((product) => ({
       ...product,
-      image: product.images[0]
-        ? getAbsoluteImageUrl(`media/products/${product.images[0].url}`)
-        : null,
+      image: getProductImageUrl(product.images[0]?.url),
       images: undefined,
     }));
 
@@ -71,7 +68,7 @@ export const getProductById = async (req: Request, res: Response) => {
       ...product,
       images: product.images.map((img) => ({
         ...img,
-        url: getAbsoluteImageUrl(`media/products/${img.url}`),
+        url: getProductImageUrl(img.url) ?? img.url,
       })),
     };
 
@@ -121,12 +118,27 @@ export const updateProduct = async (req: Request, res: Response) => {
 
     const product = await productService.updateProduct(parseInt(id), bodyResult.data);
 
-    res.json({ error: null, product });
+    const productWithAbsoluteUrls = product.images
+      ? {
+          ...product,
+          images: product.images.map((img) => ({
+            ...img,
+            url: getProductImageUrl(img.url) ?? img.url,
+          })),
+        }
+      : product;
+
+    res.json({ error: null, product: productWithAbsoluteUrls });
   } catch (error: any) {
     console.error('Error updating product:', error);
 
     if (error.code === 'P2025') {
       return res.status(404).json({ error: 'Product not found' });
+    }
+    if (error.code === 'P2002') {
+      return res
+        .status(400)
+        .json({ error: 'Variant with this size already exists for this product' });
     }
 
     res.status(500).json({ error: 'Failed to update product' });
@@ -251,39 +263,6 @@ export const addProductVariant = async (req: Request, res: Response) => {
   }
 };
 
-export const updateProductVariant = async (req: Request, res: Response) => {
-  try {
-    const paramsResult = deleteProductVariantSchema.safeParse(req.params);
-
-    if (!paramsResult.success) {
-      return res.status(400).json({ error: 'Invalid variant ID' });
-    }
-
-    const bodyResult = updateProductVariantSchema.safeParse(req.body);
-
-    if (!bodyResult.success) {
-      return res
-        .status(400)
-        .json({ error: 'Invalid variant data', details: bodyResult.error.issues });
-    }
-
-    const { variantId } = paramsResult.data;
-    const { stock } = bodyResult.data;
-
-    const variant = await productService.updateProductVariant(parseInt(variantId), stock);
-
-    res.json({ error: null, variant });
-  } catch (error: any) {
-    console.error('Error updating product variant:', error);
-
-    if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'Variant not found' });
-    }
-
-    res.status(500).json({ error: 'Failed to update variant' });
-  }
-};
-
 export const deleteProductVariant = async (req: Request, res: Response) => {
   try {
     const parseResult = deleteProductVariantSchema.safeParse(req.params);
@@ -314,19 +293,19 @@ export const getProductStats = async (req: Request, res: Response) => {
 
     const topSellingWithImages = stats.topSelling.map((p) => ({
       ...p,
-      image: p.images[0] ? getAbsoluteImageUrl(`media/products/${p.images[0].url}`) : null,
+      image: getProductImageUrl(p.images[0]?.url),
       images: undefined,
     }));
 
     const mostViewedWithImages = stats.mostViewed.map((p) => ({
       ...p,
-      image: p.images[0] ? getAbsoluteImageUrl(`media/products/${p.images[0].url}`) : null,
+      image: getProductImageUrl(p.images[0]?.url),
       images: undefined,
     }));
 
     const mostFavoritedWithImages = stats.mostFavorited.map((p) => ({
       ...p,
-      image: p.images[0] ? getAbsoluteImageUrl(`media/products/${p.images[0].url}`) : null,
+      image: getProductImageUrl(p.images[0]?.url),
       images: undefined,
       favoritesCount: p._count.favorites,
       _count: undefined,
@@ -334,7 +313,7 @@ export const getProductStats = async (req: Request, res: Response) => {
 
     const outOfStockWithImages = stats.outOfStock.map((p) => ({
       ...p,
-      image: p.images[0] ? getAbsoluteImageUrl(`media/products/${p.images[0].url}`) : null,
+      image: getProductImageUrl(p.images[0]?.url),
       images: undefined,
     }));
 

@@ -334,41 +334,6 @@ paths:
                 '400':
                     description: Invalid query parameters
 
-    /products/{id}/ratings/average:
-        get:
-            summary: Get product rating average
-            description: Returns the average rating and total count of approved ratings for a specific product.
-            tags:
-                - Ratings
-            parameters:
-                - in: path
-                  name: id
-                  required: true
-                  schema:
-                      type: integer
-                  description: Product ID
-            responses:
-                '200':
-                    description: Rating average and count
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    error:
-                                        type: null
-                                    average:
-                                        type: number
-                                        format: float
-                                        description: Average rating (rounded to 1 decimal place)
-                                        example: 4.5
-                                    count:
-                                        type: integer
-                                        description: Total number of approved ratings
-                                        example: 23
-                '400':
-                    description: Invalid product ID
-
     /category/{slug}/metadata:
         get:
             summary: Get category with metadata
@@ -1364,6 +1329,140 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/Error'
 
+    /user/me:
+        get:
+            summary: Get current user profile
+            description: Returns the authenticated user's profile data (id, name, email, role). Requires authentication token in the Authorization header. Does not expose password or token.
+            tags:
+                - Users
+            security:
+                - BearerAuth: []
+            responses:
+                '200':
+                    description: User profile retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        nullable: true
+                                    user:
+                                        $ref: '#/components/schemas/UserProfile'
+                '401':
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Unauthorized
+                '404':
+                    description: User not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: User not found
+        put:
+            summary: Update current user profile
+            description: |
+                Updates the authenticated user's profile. All fields are optional - send only the fields you want to update.
+                For password change, both `password` and `confirmPassword` are required and must match.
+                Email must be unique - returns error if already in use by another user.
+            tags:
+                - Users
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                name:
+                                    type: string
+                                    minLength: 3
+                                    description: User's full name (minimum 3 characters)
+                                    example: João Silva
+                                email:
+                                    type: string
+                                    format: email
+                                    minLength: 6
+                                    description: User's email (must be unique)
+                                    example: joao.silva@example.com
+                                password:
+                                    type: string
+                                    minLength: 8
+                                    format: password
+                                    description: New password (requires confirmPassword)
+                                    example: senha123456
+                                confirmPassword:
+                                    type: string
+                                    minLength: 8
+                                    format: password
+                                    description: Password confirmation (must match password)
+                                    example: senha123456
+            responses:
+                '200':
+                    description: Profile updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        nullable: true
+                                    user:
+                                        $ref: '#/components/schemas/UserProfile'
+                '400':
+                    description: Invalid request body, password/confirmPassword mismatch, or email already in use
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Invalid request body
+                                    details:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                field:
+                                                    type: string
+                                                message:
+                                                    type: string
+                '401':
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Unauthorized
+                '404':
+                    description: User not found
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: User not found
+
     /user/addresses:
         post:
             summary: Add user address
@@ -1491,6 +1590,154 @@ paths:
                                     error:
                                         type: string
                                         example: Failed to get user addresses
+
+    /user/addresses/{id}:
+        put:
+            summary: Update user address
+            description: Updates an existing address for the authenticated user. The address must belong to the user. Requires authentication token in the Authorization header.
+            tags:
+                - Users
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+                      description: Address ID to update
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - zipcode
+                                - street
+                                - number
+                                - city
+                                - state
+                                - country
+                            properties:
+                                zipcode:
+                                    type: string
+                                    minLength: 8
+                                    description: Address zipcode/postal code (minimum 8 characters)
+                                    example: '01310100'
+                                street:
+                                    type: string
+                                    minLength: 3
+                                    description: Street name (minimum 3 characters)
+                                    example: Av. Paulista
+                                number:
+                                    type: string
+                                    minLength: 1
+                                    description: Street number
+                                    example: '1000'
+                                city:
+                                    type: string
+                                    minLength: 3
+                                    description: City name (minimum 3 characters)
+                                    example: São Paulo
+                                state:
+                                    type: string
+                                    minLength: 2
+                                    description: State/Province (minimum 2 characters)
+                                    example: SP
+                                country:
+                                    type: string
+                                    minLength: 2
+                                    description: Country (minimum 2 characters)
+                                    example: BR
+                                complement:
+                                    type: string
+                                    description: Additional address information (optional)
+                                    example: Apto 101
+            responses:
+                '200':
+                    description: Address updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AddressResponse'
+                '400':
+                    description: Invalid request body or invalid address ID
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Invalid request body
+                '401':
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Unauthorized
+                '404':
+                    description: Address not found or does not belong to user
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Address not found
+        delete:
+            summary: Delete user address
+            description: Deletes an address for the authenticated user. The address must belong to the user. Requires authentication token in the Authorization header.
+            tags:
+                - Users
+            security:
+                - BearerAuth: []
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+                      description: Address ID to delete
+            responses:
+                '204':
+                    description: Address deleted successfully (no content)
+                '400':
+                    description: Invalid address ID
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Invalid address ID
+                '401':
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Unauthorized
+                '404':
+                    description: Address not found or does not belong to user
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Address not found
 
     /user/favorites:
         post:
@@ -2131,6 +2378,105 @@ paths:
                                     error:
                                         type: string
                                         example: Failed to get users
+        post:
+            summary: Create user (admin)
+            description: Creates a new user. Admin can optionally set the role (customer or admin). Email must be unique. Requires admin authentication.
+            tags:
+                - Admin
+            security:
+                - BearerAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            required:
+                                - name
+                                - email
+                                - password
+                            properties:
+                                name:
+                                    type: string
+                                    minLength: 3
+                                    description: User full name
+                                    example: João Silva
+                                email:
+                                    type: string
+                                    format: email
+                                    minLength: 6
+                                    description: User email (must be unique)
+                                    example: joao@example.com
+                                password:
+                                    type: string
+                                    minLength: 8
+                                    format: password
+                                    description: User password
+                                    example: senha123456
+                                role:
+                                    type: string
+                                    enum: [customer, admin]
+                                    default: customer
+                                    description: User role (optional, defaults to customer)
+                                    example: customer
+            responses:
+                '201':
+                    description: User created successfully
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        nullable: true
+                                    user:
+                                        $ref: '#/components/schemas/UserBasic'
+                '400':
+                    description: Invalid request body or email already in use
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Invalid request body
+                                    details:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                field:
+                                                    type: string
+                                                message:
+                                                    type: string
+                '401':
+                    description: Unauthorized - Invalid or missing token
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Error'
+                '403':
+                    description: Forbidden - User is not an admin
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Access denied. Admin only.
+                '500':
+                    description: Internal server error
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: string
+                                        example: Failed to create user
 
     /admin/users/stats:
         get:
@@ -2261,7 +2607,10 @@ paths:
                                         example: Failed to get user
         put:
             summary: Update user
-            description: Updates user information (name and/or email). All fields are optional. Requires admin authentication.
+            description: |
+                Updates user information (name, email, password, and/or role). All fields are optional - send only what you want to change.
+                For password change, both `password` and `confirmPassword` are required and must match.
+                Role can be `customer` or `admin`. Email must be unique. Requires admin authentication.
             tags:
                 - Admin
             security:
@@ -2283,13 +2632,32 @@ paths:
                             properties:
                                 name:
                                     type: string
-                                    description: User name (optional)
+                                    minLength: 3
+                                    description: User name (optional, min 3 chars)
                                     example: John Doe Updated
                                 email:
                                     type: string
                                     format: email
-                                    description: User email (optional)
+                                    minLength: 6
+                                    description: User email (optional, must be unique)
                                     example: john.updated@example.com
+                                password:
+                                    type: string
+                                    minLength: 8
+                                    format: password
+                                    description: New password (requires confirmPassword)
+                                    example: novaSenha123
+                                confirmPassword:
+                                    type: string
+                                    minLength: 8
+                                    format: password
+                                    description: Password confirmation (must match password)
+                                    example: novaSenha123
+                                role:
+                                    type: string
+                                    enum: [customer, admin]
+                                    description: User role (optional)
+                                    example: admin
             responses:
                 '200':
                     description: User updated successfully
@@ -2305,7 +2673,7 @@ paths:
                                     user:
                                         $ref: '#/components/schemas/UserBasic'
                 '400':
-                    description: Invalid request data or email already exists
+                    description: Invalid request data, password/confirmPassword mismatch, or email already in use
                     content:
                         application/json:
                             schema:
@@ -2313,7 +2681,16 @@ paths:
                                 properties:
                                     error:
                                         type: string
-                                        example: Email already exists
+                                        example: Invalid request data
+                                    details:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                field:
+                                                    type: string
+                                                message:
+                                                    type: string
                 '401':
                     description: Unauthorized - Invalid or missing token
                     content:
@@ -2422,93 +2799,6 @@ paths:
                                     error:
                                         type: string
                                         example: Failed to delete user
-
-    /admin/users/{id}/role:
-        put:
-            summary: Update user role
-            description: Changes a user's role between customer and admin. Requires admin authentication.
-            tags:
-                - Admin
-            security:
-                - BearerAuth: []
-            parameters:
-                - in: path
-                  name: id
-                  required: true
-                  schema:
-                      type: integer
-                  description: User ID
-                  example: 1
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            required:
-                                - role
-                            properties:
-                                role:
-                                    type: string
-                                    enum: [customer, admin]
-                                    description: New role for the user
-                                    example: admin
-            responses:
-                '200':
-                    description: User role updated successfully
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    error:
-                                        type: string
-                                        nullable: true
-                                        example: null
-                                    user:
-                                        $ref: '#/components/schemas/UserBasic'
-                '400':
-                    description: Invalid request data
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                '401':
-                    description: Unauthorized - Invalid or missing token
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/Error'
-                '403':
-                    description: Forbidden - User is not an admin
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    error:
-                                        type: string
-                                        example: Access denied. Admin only.
-                '404':
-                    description: User not found
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    error:
-                                        type: string
-                                        example: User not found
-                '500':
-                    description: Internal server error
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    error:
-                                        type: string
-                                        example: Failed to update user role
 
     /admin/banners:
         get:
@@ -3106,7 +3396,10 @@ paths:
                     description: Forbidden - user is not an admin
         put:
             summary: Update product (Admin)
-            description: Updates an existing product. All fields are optional. Requires admin authentication.
+            description: |
+                Updates an existing product. All fields are optional. Includes product data (label, price, etc.) and variants.
+                For variants: include `id` to update existing variant (size, stock); omit `id` to add new variant.
+                Requires admin authentication.
             tags:
                 - Admin
             security:
@@ -3150,6 +3443,43 @@ paths:
                                     type: integer
                                     description: Category ID
                                     example: 2
+                                variants:
+                                    type: array
+                                    description: Variants to update or add (id = update, no id = create)
+                                    items:
+                                        type: object
+                                        properties:
+                                            id:
+                                                type: integer
+                                                description: Variant ID (optional, for update)
+                                                example: 1
+                                            size:
+                                                type: string
+                                                description: Size/title of variant (e.g. P, M, G)
+                                                example: M
+                                            stock:
+                                                type: integer
+                                                minimum: 0
+                                                description: Stock quantity
+                                                example: 15
+                                images:
+                                    type: array
+                                    description: |
+                                        Images to sync (replace mode). Item with `id` updates existing image URL; item without `id` adds new image.
+                                        Images not included in this array are removed from the product.
+                                    items:
+                                        type: object
+                                        required:
+                                            - url
+                                        properties:
+                                            id:
+                                                type: integer
+                                                description: Image ID (optional, for update)
+                                                example: 1
+                                            url:
+                                                type: string
+                                                description: Image URL or path
+                                                example: media/products/produto-1.png
             responses:
                 '200':
                     description: Product updated successfully
@@ -3187,6 +3517,26 @@ paths:
                                             categoryId:
                                                 type: integer
                                                 example: 2
+                                            variants:
+                                                type: array
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        id:
+                                                            type: integer
+                                                        size:
+                                                            type: string
+                                                        stock:
+                                                            type: integer
+                                            images:
+                                                type: array
+                                                items:
+                                                    type: object
+                                                    properties:
+                                                        id:
+                                                            type: integer
+                                                        url:
+                                                            type: string
                                             viewsCount:
                                                 type: integer
                                                 example: 45
@@ -3200,7 +3550,7 @@ paths:
                                                 type: string
                                                 format: date-time
                 '400':
-                    description: Invalid product data or ID
+                    description: Invalid product data, duplicate variant size, or invalid ID
                     content:
                         application/json:
                             schema:
@@ -3502,89 +3852,6 @@ paths:
                     description: Forbidden - user is not an admin
 
     /admin/products/variants/{variantId}:
-        put:
-            summary: Update variant stock (Admin)
-            description: Updates the stock quantity of a product variant. Requires admin authentication.
-            tags:
-                - Admin
-            security:
-                - BearerAuth: []
-            parameters:
-                - in: path
-                  name: variantId
-                  required: true
-                  schema:
-                      type: integer
-                  description: Variant ID
-            requestBody:
-                required: true
-                content:
-                    application/json:
-                        schema:
-                            type: object
-                            required:
-                                - stock
-                            properties:
-                                stock:
-                                    type: integer
-                                    minimum: 0
-                                    description: New stock quantity
-                                    example: 75
-            responses:
-                '200':
-                    description: Variant updated successfully
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    error:
-                                        type: null
-                                    variant:
-                                        type: object
-                                        properties:
-                                            id:
-                                                type: integer
-                                                example: 1
-                                            productId:
-                                                type: integer
-                                                example: 1
-                                            size:
-                                                type: string
-                                                example: M
-                                            stock:
-                                                type: integer
-                                                example: 75
-                                            createdAt:
-                                                type: string
-                                                format: date-time
-                                            updatedAt:
-                                                type: string
-                                                format: date-time
-                '400':
-                    description: Invalid variant data
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    error:
-                                        type: string
-                                        example: Invalid variant data
-                '404':
-                    description: Variant not found
-                    content:
-                        application/json:
-                            schema:
-                                type: object
-                                properties:
-                                    error:
-                                        type: string
-                                        example: Variant not found
-                '401':
-                    description: Unauthorized - missing or invalid token
-                '403':
-                    description: Forbidden - user is not an admin
         delete:
             summary: Delete product variant (Admin)
             description: Removes a variant from a product. Requires admin authentication.
@@ -4578,8 +4845,17 @@ components:
                     example: http://localhost:3333/media/products/camiseta-react-azul.png
                 liked:
                     type: boolean
-                    description: Whether the product is liked by the user (TODO - always false for now)
+                    description: Whether the product is liked by the user
                     example: false
+                ratingAverage:
+                    type: number
+                    format: float
+                    description: Average rating from approved reviews (0-5, rounded to 1 decimal)
+                    example: 4.5
+                ratingCount:
+                    type: integer
+                    description: Total number of approved ratings
+                    example: 23
 
         ProductsResponse:
             type: object
@@ -4636,6 +4912,19 @@ components:
                     example:
                         - http://localhost:3333/media/products/camiseta-react-azul.png
                         - http://localhost:3333/media/products/camiseta-react-preta.png
+                liked:
+                    type: boolean
+                    description: Whether the product is liked by the user
+                    example: false
+                ratingAverage:
+                    type: number
+                    format: float
+                    description: Average rating from approved reviews (0-5, rounded to 1 decimal)
+                    example: 4.5
+                ratingCount:
+                    type: integer
+                    description: Total number of approved ratings
+                    example: 23
 
         Category:
             type: object
@@ -4875,6 +5164,31 @@ components:
                     format: email
                     description: User's email address
                     example: joao.silva@example.com
+
+        UserProfile:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    description: User unique identifier
+                    example: 1
+                name:
+                    type: string
+                    description: User's full name
+                    example: João Silva
+                email:
+                    type: string
+                    format: email
+                    description: User's email address
+                    example: joao.silva@example.com
+                role:
+                    type: string
+                    description: User role (customer or admin)
+                    example: customer
+                createdAt:
+                    type: string
+                    format: date-time
+                    description: Account creation timestamp
 
         UserResponse:
             type: object

@@ -91,7 +91,7 @@ model ProductImage {
   url       String
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model ProductMetadata {
@@ -101,7 +101,7 @@ model ProductMetadata {
   metadataValueId    String
   createdAt          DateTime @default(now())
   updatedAt          DateTime @default(now()) @updatedAt
-  product            Product  @relation(fields: [productId], references: [id])
+  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model Category {
@@ -118,6 +118,7 @@ model Category {
 model CategoryMetadata {
   id         String          @id
   name       String
+  nameEn     String?
   categoryId Int
   createdAt  DateTime        @default(now())
   updatedAt  DateTime        @default(now()) @updatedAt
@@ -128,6 +129,7 @@ model CategoryMetadata {
 model MetadataValue {
   id                 String           @id
   label              String
+  labelEn            String?
   categoryMetadataId String
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @default(now()) @updatedAt
@@ -212,7 +214,7 @@ model Favorite {
   productId Int
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([userId, productId])
 }

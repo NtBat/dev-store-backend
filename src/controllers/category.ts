@@ -94,7 +94,7 @@ export const deleteCategory: RequestHandler = async (req: Request, res: Response
 export const createCategoryMetadata: RequestHandler = async (req: Request, res: Response) => {
   try {
     const { categoryId } = req.params;
-    const { id, name } = req.body;
+    const { id, name, nameEn } = req.body;
 
     if (!id || !name) {
       res.status(400).json({ error: 'id and name are required' });
@@ -104,6 +104,7 @@ export const createCategoryMetadata: RequestHandler = async (req: Request, res: 
     const metadata = await categoryService.createCategoryMetadata({
       id,
       name,
+      nameEn,
       categoryId: Number(categoryId),
     });
 
@@ -122,14 +123,9 @@ export const createCategoryMetadata: RequestHandler = async (req: Request, res: 
 export const updateCategoryMetadata: RequestHandler = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name } = req.body;
+    const { name, nameEn } = req.body;
 
-    if (!name) {
-      res.status(400).json({ error: 'name is required' });
-      return;
-    }
-
-    const metadata = await categoryService.updateCategoryMetadata(id as string, { name });
+    const metadata = await categoryService.updateCategoryMetadata(id as string, { name, nameEn });
 
     res.json(metadata);
   } catch (error) {
@@ -154,7 +150,7 @@ export const deleteCategoryMetadata: RequestHandler = async (req: Request, res: 
 export const createMetadataValue: RequestHandler = async (req: Request, res: Response) => {
   try {
     const { metadataId } = req.params;
-    const { id, label } = req.body;
+    const { id, label, labelEn } = req.body;
 
     if (!id || !label) {
       res.status(400).json({ error: 'id and label are required' });
@@ -164,6 +160,7 @@ export const createMetadataValue: RequestHandler = async (req: Request, res: Res
     const value = await categoryService.createMetadataValue({
       id,
       label,
+      labelEn,
       categoryMetadataId: metadataId as string,
     });
 
@@ -182,14 +179,9 @@ export const createMetadataValue: RequestHandler = async (req: Request, res: Res
 export const updateMetadataValue: RequestHandler = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { label } = req.body;
+    const { label, labelEn } = req.body;
 
-    if (!label) {
-      res.status(400).json({ error: 'label is required' });
-      return;
-    }
-
-    const value = await categoryService.updateMetadataValue(id as string, { label });
+    const value = await categoryService.updateMetadataValue(id as string, { label, labelEn });
 
     res.json(value);
   } catch (error) {

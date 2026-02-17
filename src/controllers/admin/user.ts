@@ -4,8 +4,35 @@ import {
   getUsersQuerySchema,
   getUserByIdSchema,
   updateUserSchema,
-  updateUserRoleSchema,
+  createUserSchema,
 } from '../../schemas/admin/user-schema';
+
+export const createUser = async (req: Request, res: Response) => {
+  try {
+    const parseResult = createUserSchema.safeParse(req.body);
+
+    if (!parseResult.success) {
+      const details = parseResult.error.issues.map((issue) => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+      }));
+      return res.status(400).json({ error: 'Invalid request body', details });
+    }
+
+    const { name, email, password, role } = parseResult.data;
+
+    const user = await userService.createUser({ name, email, password, role });
+
+    if (!user) {
+      return res.status(400).json({ error: 'Email already in use' });
+    }
+
+    res.status(201).json({ error: null, user });
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ error: 'Failed to create user' });
+  }
+};
 
 export const getAllUsers = async (req: Request, res: Response) => {
   try {
@@ -59,14 +86,21 @@ export const updateUser = async (req: Request, res: Response) => {
     const paramsResult = getUserByIdSchema.safeParse(req.params);
     const bodyResult = updateUserSchema.safeParse(req.body);
 
-    if (!paramsResult.success || !bodyResult.success) {
-      return res.status(400).json({ error: 'Invalid request data' });
+    if (!paramsResult.success) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+    if (!bodyResult.success) {
+      const details = bodyResult.error.issues.map((issue) => ({
+        field: issue.path.join('.'),
+        message: issue.message,
+      }));
+      return res.status(400).json({ error: 'Invalid request data', details });
     }
 
     const { id } = paramsResult.data;
-    const data = bodyResult.data;
+    const { name, email, password, role } = bodyResult.data;
 
-    const user = await userService.updateUser(parseInt(id), data);
+    const user = await userService.updateUser(parseInt(id), { name, email, password, role });
 
     res.json({ error: null, user });
   } catch (error: any) {
@@ -74,34 +108,10 @@ export const updateUser = async (req: Request, res: Response) => {
     if (error.code === 'P2025') {
       return res.status(404).json({ error: 'User not found' });
     }
-    if (error.code === 'P2002') {
-      return res.status(400).json({ error: 'Email already exists' });
+    if (error.code === 'P2002' || error.code === 'EMAIL_TAKEN') {
+      return res.status(400).json({ error: 'Email already in use' });
     }
     res.status(500).json({ error: 'Failed to update user' });
-  }
-};
-
-export const updateUserRole = async (req: Request, res: Response) => {
-  try {
-    const paramsResult = getUserByIdSchema.safeParse(req.params);
-    const bodyResult = updateUserRoleSchema.safeParse(req.body);
-
-    if (!paramsResult.success || !bodyResult.success) {
-      return res.status(400).json({ error: 'Invalid request data' });
-    }
-
-    const { id } = paramsResult.data;
-    const { role } = bodyResult.data;
-
-    const user = await userService.updateUserRole(parseInt(id), role);
-
-    res.json({ error: null, user });
-  } catch (error: any) {
-    console.error('Error updating user role:', error);
-    if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    res.status(500).json({ error: 'Failed to update user role' });
   }
 };
 

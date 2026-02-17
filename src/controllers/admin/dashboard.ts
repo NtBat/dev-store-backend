@@ -5,7 +5,7 @@ import {
   getOrdersChartSchema,
   getTopProductsSchema,
 } from '../../schemas/admin/dashboard-schema';
-import { getAbsoluteImageUrl } from '../../utils/get-absolute-image-url';
+import { getProductImageUrl } from '../../utils/get-absolute-image-url';
 
 export const getDashboardMetrics = async (req: Request, res: Response) => {
   try {
@@ -17,19 +17,19 @@ export const getDashboardMetrics = async (req: Request, res: Response) => {
         ...metrics.products,
         mostViewed: metrics.products.mostViewed.map((p) => ({
           ...p,
-          image: p.images[0] ? getAbsoluteImageUrl(`media/products/${p.images[0].url}`) : null,
+          image: p.images[0] ? getProductImageUrl(p.images[0]?.url) : null,
           images: undefined,
         })),
         mostSold: metrics.products.mostSold.map((p) => ({
           ...p,
-          image: p.images[0] ? getAbsoluteImageUrl(`media/products/${p.images[0].url}`) : null,
+          image: p.images[0] ? getProductImageUrl(p.images[0]?.url) : null,
           images: undefined,
         })),
         mostFavorited: metrics.products.mostFavorited.map((p) => ({
           ...p,
           favoritesCount: p._count.favorites,
           _count: undefined,
-          image: p.images[0] ? getAbsoluteImageUrl(`media/products/${p.images[0].url}`) : null,
+          image: p.images[0] ? getProductImageUrl(p.images[0]?.url) : null,
           images: undefined,
         })),
       },
@@ -94,7 +94,7 @@ export const getTopProducts = async (req: Request, res: Response) => {
 
     const productsWithImages = products.map((p: any) => ({
       ...p,
-      image: p.images[0] ? getAbsoluteImageUrl(`media/products/${p.images[0].url}`) : null,
+      image: p.images[0] ? getProductImageUrl(p.images[0]?.url) : null,
       images: undefined,
     }));
 
